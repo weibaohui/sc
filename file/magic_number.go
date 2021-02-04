@@ -1,8 +1,14 @@
 package file
 
-const (
-	ZIP = "504B0304"
-)
+type MagicType struct {
+	Name  string
+	Magic string
+}
+
+var Types = []MagicType{
+	{Name: "GOLANG", Magic: "CFFAEDFE"},
+	{Name: "ZIP", Magic: "504B0304"},
+}
 
 //
 // /**

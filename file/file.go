@@ -93,12 +93,15 @@ func (f *File) CountLines(config *config.Config) (int, error) {
 	if _, err := sf.Read(b); err == nil {
 		head = hex.EncodeToString(b)
 		head = strings.ToUpper(head)
-		if strings.HasPrefix(head, ZIP) {
-			if config.Debug {
-				fmt.Printf("识别到【%s】类型文件 %s,跳过\n", "ZIP", f.FullPath)
+		for _, magicType := range Types {
+			if strings.HasPrefix(head, magicType.Magic) {
+				if config.Debug {
+					fmt.Printf("识别到【%s】类型文件 %s,跳过\n", magicType.Name, f.FullPath)
+				}
+				return 0, nil
 			}
-			return 0, nil
 		}
+
 	}
 
 	if err != nil {
