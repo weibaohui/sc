@@ -12,7 +12,7 @@ import (
 )
 
 var ignoreHide = true
-var debug = true
+var debug = false
 var path string
 
 var rootCmd = &cobra.Command{
@@ -20,7 +20,7 @@ var rootCmd = &cobra.Command{
 	Short: "统计源码行数",
 	Long:  "按文件夹统计源码行数",
 	Run: func(cmd *cobra.Command, args []string) {
-		config := config.New(ignoreHide, true)
+		config := config.New(ignoreHide, debug)
 		initFolder := &file.Folder{
 			FullPath: path,
 			Hidden:   false,

@@ -8,9 +8,16 @@ type MagicType struct {
 }
 
 var Types = []MagicType{
-	{Name: "GOLANG", Magic: "CFFAEDFE", Skip: true},
+	{Name: "binary", Magic: "CFFAEDFE", Skip: true},
 	{Name: "ZIP", Magic: "504B0304", Suffix: "zip;jar", Skip: true},
 	{Name: "MS Office/OLE2", Magic: "D0CF11E0", Suffix: "doc;xls;dot;ppt;xla;ppa;pps;pot;msi;sdw;db", Skip: true},
+	{Name: "GZ Archive", Magic: "1F8B08", Suffix: "gz;tgz", Skip: true},
+	{Name: "RUST", Magic: "72757374", Suffix: "rmeta", Skip: true},
+	{Name: "RUST", Magic: "213C6172", Suffix: "rlib", Skip: true},
+	{Name: "dia", Magic: "444941470", Suffix: "dia", Skip: true},
+	{Name: "rust bin", Magic: "52534943", Suffix: "bin", Skip: true},
+	{Name: "dia", Magic: "444941470", Suffix: "dia", Skip: true},
+	{Name: "font ttf", Magic: "0001000000", Suffix: "ttf", Skip: true},
 	{Name: "GZ Archive", Magic: "1F8B08", Suffix: "gz;tgz", Skip: true},
 	{Name: "BMP", Magic: "424D", Skip: true},
 	{Name: "CAD", Magic: "41433130", Suffix: "dwg", Skip: true},
@@ -48,7 +55,6 @@ var Types = []MagicType{
 	{Name: "Java-Class", Suffix: "class", Magic: "CAFEBASE", Skip: true},
 	{Name: "PC", Suffix: "pcx", Magic: "0A050108", Skip: true},
 	{Name: "PC", Suffix: "pcx", Magic: "0A050108", Skip: true},
-
 	{Name: "AOL ART", Magic: "4A47040E", Suffix: "art", Skip: true},
 	{Name: "AOL ART", Magic: "4A47030E", Suffix: "art", Skip: true},
 	{Name: "TIFF", Magic: "49492A00", Suffix: "tif;tiff", Skip: true},

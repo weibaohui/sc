@@ -1,6 +1,7 @@
 package count
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"sc/config"
@@ -8,38 +9,43 @@ import (
 )
 
 type Counter struct {
+	Code    int // 代码行数
+	Blank   int // 空行
+	Comment int // 注释
 }
 
 func (c *Counter) Execute(f *file.Folder, config *config.Config) {
-	count := countFolder(f, config)
-	fmt.Printf("\n共计【 %d 】行", count)
+	c.countFolder(f, config)
+	bytes, _ := json.Marshal(c)
+	fmt.Println(string(bytes))
 }
 
 // 按文件夹统计
-func countFolder(f *file.Folder, config *config.Config) int {
+func (c *Counter) countFolder(f *file.Folder, config *config.Config) {
 	if config.IgnoreHide && f.Hidden {
-		return 0
+		return
 	}
-	fileList, folderList := file.List(f.FullPath)
+	fileList, folderList := f.List(f.FullPath, config)
+	// 计算文件里的代码行数
+	c.countFile(fileList, config)
 
-	count := countFile(fileList, config)
-
+	// 按文件夹迭代，计算文件里的代码行数
 	for _, folder := range folderList {
-		count += countFolder(folder, config)
+		c.countFolder(folder, config)
 	}
 
-	return count
 }
 
 // 按文件统计
-func countFile(fileList []*file.File, config *config.Config) (finalCount int) {
+func (c *Counter) countFile(fileList []*file.File, config *config.Config) {
 	for _, f := range fileList {
-		count, err := f.CountLines(config)
+		codeCount, blankCount, commentCount, err := f.CountLines(config)
 		if err != nil {
-			fmt.Println(err.Error())
+			// fmt.Println(err.Error())
 			continue
 		}
-		finalCount += count
+		c.Code += codeCount
+		c.Blank += blankCount
+		c.Comment += commentCount
 	}
-	return finalCount
 }

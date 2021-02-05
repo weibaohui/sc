@@ -15,27 +15,10 @@ import (
 )
 
 type File struct {
-	Name         string
-	FullPath     string
-	Hidden       bool
-	Suffix       string
-	commentCount int
-	codeCount    int
-	blankCount   int
-}
-
-func (f *File) Count() int {
-	return f.codeCount + f.blankCount
-}
-
-func (f *File) CommentCount() int {
-	return f.commentCount
-}
-func (f *File) CodeCount() int {
-	return f.codeCount
-}
-func (f *File) BlankCount() int {
-	return f.blankCount
+	Name     string
+	FullPath string
+	Hidden   bool
+	Suffix   string
 }
 
 type Folder struct {
@@ -45,8 +28,8 @@ type Folder struct {
 }
 
 // 列出指定路径下的文件和文件夹
-func List(pwd string) (fileList []*File, folderList []*Folder) {
-	fileInfos, err := ioutil.ReadDir(pwd)
+func (f *Folder) List(fullPath string, c *config.Config) (fileList []*File, folderList []*Folder) {
+	fileInfos, err := ioutil.ReadDir(fullPath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -54,17 +37,23 @@ func List(pwd string) (fileList []*File, folderList []*Folder) {
 	for _, fi := range fileInfos {
 		hidden := strings.HasPrefix(fi.Name(), ".")
 		if fi.IsDir() {
+			// 文件夹是否在排除列表
+			for _, s := range c.Exclude {
+				if s == fi.Name() {
+					return
+				}
+			}
 			folderList = append(folderList,
 				&Folder{
 					Name:     fi.Name(),
-					FullPath: path.Join(pwd, fi.Name()),
+					FullPath: path.Join(fullPath, fi.Name()),
 					Hidden:   hidden,
 				})
 		} else {
 			fileList = append(fileList,
 				&File{
 					Name:     fi.Name(),
-					FullPath: path.Join(pwd, fi.Name()),
+					FullPath: path.Join(fullPath, fi.Name()),
 					Hidden:   hidden,
 					Suffix:   ext(fi.Name()),
 				})
@@ -83,49 +72,52 @@ func ext(pwd string) string {
 	return ""
 }
 
-func (f *File) CountLines(config *config.Config) (int, error) {
+func (f *File) CountLines(config *config.Config) (codeCount, blankCount, commentCount int, err error) {
+
 	if config.IgnoreHide && f.Hidden {
-		return 0, nil
+		return
 	}
 	sf, err := os.Open(f.FullPath)
+	defer sf.Close()
 	b := make([]byte, 30)
 	head := ""
-	if _, err := sf.Read(b); err == nil {
+	if _, err = sf.Read(b); err == nil {
+
 		head = hex.EncodeToString(b)
 		head = strings.ToUpper(head)
-		for _, magicType := range Types {
+		// fmt.Printf("识别 %s 文件%s \n", f.FullPath, string(b))
 
+		for _, magicType := range Types {
 			if strings.HasPrefix(head, magicType.Magic) {
 				if config.Debug {
-					fmt.Printf("识别到【%s】类型文件%s,跳过=%t\n", magicType.Name, f.FullPath, magicType.Skip)
+					// fmt.Printf("识别到【%s】类型文件%s,跳过=%t\n", magicType.Name, f.FullPath, magicType.Skip)
 				}
-				return 0, nil
+				return
 			}
 		}
-
 	}
 
 	if err != nil {
-		return 0, err
+		return
 	}
 	buf := bufio.NewReader(sf)
 	for {
 		bytes, _, err := buf.ReadLine()
 		line := strings.TrimSpace(string(bytes))
 		if len(line) != 0 {
-			f.codeCount++
+			codeCount++
 		} else {
-			f.blankCount++
+			blankCount++
 		}
 
 		if err != nil {
 			if err == io.EOF {
 				if config.Debug {
-					fmt.Printf("文件 %s \t 类型 %s \t 行数 %d \t魔法数 %s \n", f.FullPath, f.Suffix, f.Count(), head)
+					fmt.Printf("文件 %s \t  行数 %d \t魔法数 %s \n", f.FullPath, codeCount, head)
 				}
-				return f.Count(), nil
+				return codeCount, blankCount, commentCount, nil
 			}
-			return 0, err
+			return 0, 0, 0, err
 		}
 	}
 
