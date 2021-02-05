@@ -38,6 +38,6 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.Flags().BoolVarP(&debug, "debug", "debug", false, "调试")
+	rootCmd.Flags().BoolVarP(&debug, "debug", "d", false, "调试")
 	rootCmd.Flags().StringVarP(&path, "path", "p", ".", "扫描路径")
 }
