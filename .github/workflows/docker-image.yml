@@ -17,4 +17,4 @@ jobs:
       - name: Build the Docker image
         run: docker build . --file Dockerfile --tag sc:$(date +%s)
       - name: docker ps
-        run: docker images | grep scs
+        run: docker images | grep sc
