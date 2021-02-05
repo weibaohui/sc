@@ -8,12 +8,14 @@ import (
 	"sc/file"
 )
 
+// 统计器
 type Counter struct {
 	Code    int // 代码行数
 	Blank   int // 空行
 	Comment int // 注释
 }
 
+// 执行
 func (c *Counter) Execute(f *file.Folder, config *config.Config) {
 	c.countFolder(f, config)
 	bytes, _ := json.Marshal(c)

@@ -14,6 +14,7 @@ import (
 	"sc/config"
 )
 
+// 文件
 type File struct {
 	Name     string
 	FullPath string
@@ -21,6 +22,7 @@ type File struct {
 	Suffix   string
 }
 
+// 文件夹
 type Folder struct {
 	Name     string
 	FullPath string
@@ -72,6 +74,7 @@ func ext(pwd string) string {
 	return ""
 }
 
+// 统计行数
 func (f *File) CountLines(config *config.Config) (codeCount, blankCount, commentCount int, err error) {
 
 	if config.IgnoreHide && f.Hidden {
