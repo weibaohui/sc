@@ -94,9 +94,10 @@ func (f *File) CountLines(config *config.Config) (int, error) {
 		head = hex.EncodeToString(b)
 		head = strings.ToUpper(head)
 		for _, magicType := range Types {
+
 			if strings.HasPrefix(head, magicType.Magic) {
 				if config.Debug {
-					fmt.Printf("识别到【%s】类型文件 %s,跳过\n", magicType.Name, f.FullPath)
+					fmt.Printf("识别到【%s】类型文件%s,跳过=%t\n", magicType.Name, f.FullPath, magicType.Skip)
 				}
 				return 0, nil
 			}
