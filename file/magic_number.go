@@ -1,16 +1,19 @@
 package file
 
 type MagicType struct {
-	Name  string // 类型
-	Magic string // 魔数
-	Skip  bool   // 跳过
+	Name   string // 类型
+	Magic  string // 魔数
+	Suffix string // 后缀
+	Skip   bool   // 跳过
 }
 
 var Types = []MagicType{
 	{Name: "GOLANG", Magic: "CFFAEDFE", Skip: true},
-	{Name: "ZIP", Magic: "504B0304", Skip: true},
+	{Name: "ZIP", Magic: "504B0304", Suffix: "zip;jar", Skip: true},
+	{Name: "MS Office/OLE2", Magic: "D0CF11E0", Suffix: "doc;xls;dot;ppt;xla;ppa;pps;pot;msi;sdw;db", Skip: true},
+	{Name: "GZ Archive", Magic: "1F8B08", Suffix: "gz;tgz", Skip: true},
 	{Name: "BMP", Magic: "424D", Skip: true},
-	{Name: "DWG", Magic: "41433130", Skip: true},
+	{Name: "CAD", Magic: "41433130", Suffix: "dwg", Skip: true},
 	{Name: "PSD", Magic: "38425053", Skip: true},
 	{Name: "RTF", Magic: "7B5C727466", Skip: true},
 	{Name: "XML", Magic: "3C3F786D6C"},
@@ -35,7 +38,21 @@ var Types = []MagicType{
 	{Name: "ASF", Magic: "3026B2758E66CF11", Skip: true},
 	{Name: "MID", Magic: "4D546864", Skip: true},
 	{Name: "TIFF", Magic: "49492A00", Skip: true},
-	{Name: "GIF", Magic: "47494638", Skip: true},
-	{Name: "PNG", Magic: "89504E47", Skip: true},
-	{Name: "JEPG", Magic: "FFD8FF", Skip: true},
+	{Name: "GIF", Magic: "47494638", Suffix: "gif", Skip: true},
+	{Name: "PC Paintbrush", Magic: "0A050108", Suffix: "pcx", Skip: true},
+	{Name: "PC", Suffix: "pcx", Magic: "0A050108", Skip: true},
+	{Name: "Graphics Metafile", Suffix: "wmf", Magic: "D7CDC69A", Skip: true},
+	{Name: "Graphics Metafile", Suffix: "wmf", Magic: "01000900", Skip: true},
+	{Name: "Graphics Metafile", Suffix: "wmf", Magic: "02000900", Skip: true},
+	{Name: "Enhanced Metafile", Suffix: "emf", Magic: "0A050108", Skip: true},
+	{Name: "Java-Class", Suffix: "class", Magic: "CAFEBASE", Skip: true},
+	{Name: "PC", Suffix: "pcx", Magic: "0A050108", Skip: true},
+	{Name: "PC", Suffix: "pcx", Magic: "0A050108", Skip: true},
+
+	{Name: "AOL ART", Magic: "4A47040E", Suffix: "art", Skip: true},
+	{Name: "AOL ART", Magic: "4A47030E", Suffix: "art", Skip: true},
+	{Name: "TIFF", Magic: "49492A00", Suffix: "tif;tiff", Skip: true},
+	{Name: "TIFF", Magic: "4D4D002A", Suffix: "tif;tiff", Skip: true},
+	{Name: "PNG", Magic: "89504E47", Suffix: "png", Skip: true},
+	{Name: "JEPG", Magic: "FFD8FF", Suffix: "jpg;jpeg", Skip: true},
 }
