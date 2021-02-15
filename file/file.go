@@ -11,7 +11,7 @@ import (
 	"path"
 	"strings"
 
-	"sc/config"
+	"sc/count"
 )
 
 // 文件
@@ -22,19 +22,42 @@ type File struct {
 	Suffix   string
 }
 
-// 文件夹
-type Folder struct {
-	Name     string
-	FullPath string
-	Hidden   bool
+// 按文件夹统计
+func listFolder(f *Folder) {
+	config := count.GetSourceCounter().Config()
+	if config.IgnoreHide && f.Hidden {
+		return
+	}
+	fileList, folderList := f.List(f.FullPath)
+	// 计算文件里的代码行数
+	countFile(fileList)
+
+	// 按文件夹迭代，计算文件里的代码行数
+	for _, folder := range folderList {
+		listFolder(folder)
+	}
+
+}
+
+// 按文件统计
+func countFile(fileList []*File) {
+	for _, f := range fileList {
+		err := f.CountLines()
+		if err != nil {
+			// fmt.Println(err.Error())
+			continue
+		}
+	}
 }
 
 // 列出指定路径下的文件和文件夹
-func (f *Folder) List(fullPath string, c *config.Config) (fileList []*File, folderList []*Folder) {
+func (f *Folder) List(fullPath string) (fileList []*File, folderList []*Folder) {
 	fileInfos, err := ioutil.ReadDir(fullPath)
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	c := count.GetSourceCounter().Config()
 
 	for _, fi := range fileInfos {
 		hidden := strings.HasPrefix(fi.Name(), ".")
@@ -57,7 +80,7 @@ func (f *Folder) List(fullPath string, c *config.Config) (fileList []*File, fold
 					Name:     fi.Name(),
 					FullPath: path.Join(fullPath, fi.Name()),
 					Hidden:   hidden,
-					Suffix:   ext(fi.Name()),
+					Suffix:   path.Ext(fi.Name()),
 				})
 		}
 	}
@@ -65,21 +88,16 @@ func (f *Folder) List(fullPath string, c *config.Config) (fileList []*File, fold
 	return
 }
 
-// 取后缀
-func ext(pwd string) string {
-	tmp := strings.Split(pwd, ".")
-	if len(tmp) >= 2 && tmp[0] != "" {
-		return strings.ToLower(tmp[len(tmp)-1])
-	}
-	return ""
-}
-
 // 统计行数
-func (f *File) CountLines(config *config.Config) (codeCount, blankCount, commentCount int, err error) {
+func (f *File) CountLines() error {
+	counter := count.GetSourceCounter()
+	config := counter.Config()
 
 	if config.IgnoreHide && f.Hidden {
-		return
+		return nil
 	}
+	ext := path.Ext(f.FullPath)
+
 	sf, err := os.Open(f.FullPath)
 	defer sf.Close()
 	b := make([]byte, 30)
@@ -95,32 +113,34 @@ func (f *File) CountLines(config *config.Config) (codeCount, blankCount, comment
 				if config.Debug {
 					// fmt.Printf("识别到【%s】类型文件%s,跳过=%t\n", magicType.Name, f.FullPath, magicType.Skip)
 				}
-				return
+				return nil
 			}
 		}
 	}
 
 	if err != nil {
-		return
+		return nil
 	}
 	buf := bufio.NewReader(sf)
+	codeCount := 0
 	for {
 		bytes, _, err := buf.ReadLine()
 		line := strings.TrimSpace(string(bytes))
 		if len(line) != 0 {
-			codeCount++
-		} else {
-			blankCount++
-		}
+			counter.Add(ext, "Code", 1)
 
+		} else {
+			counter.Add(ext, "Blank", 1)
+		}
+		codeCount++
 		if err != nil {
 			if err == io.EOF {
 				if config.Debug {
 					fmt.Printf("文件 %s \t  行数 %d \t魔法数 %s \n", f.FullPath, codeCount, head)
 				}
-				return codeCount, blankCount, commentCount, nil
+				return nil
 			}
-			return 0, 0, 0, err
+			return err
 		}
 	}
 

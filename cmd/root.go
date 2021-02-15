@@ -20,13 +20,16 @@ var rootCmd = &cobra.Command{
 	Short: "统计源码行数",
 	Long:  "按文件夹统计源码行数",
 	Run: func(cmd *cobra.Command, args []string) {
+
 		config := config.New(ignoreHide, debug)
+		counter := count.NewSourceCounter(config)
+
 		initFolder := &file.Folder{
 			FullPath: path,
 			Hidden:   false,
 		}
-		counter := count.Counter{}
-		counter.Execute(initFolder, config)
+		initFolder.Execute()
+		println(counter.Sum().String())
 	},
 }
 
