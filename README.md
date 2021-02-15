@@ -65,4 +65,4 @@ Flags:
 # todo
 
 - docker √
-- git ing
+- git list ing
