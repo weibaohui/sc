@@ -16,7 +16,7 @@ type Folder struct {
 	Hidden   bool
 }
 
-// Execute
+// Execute Start to execute
 func (f *Folder) Execute() {
 	countFolderList(f)
 }

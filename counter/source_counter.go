@@ -11,10 +11,10 @@ import (
 var (
 	sc               *SourceCounter
 	once             sync.Once
-	CountTypeCode    = "Code"
-	CountTypeBlank   = "Blank"
-	CountTypeComment = "Comment"
-	CountTypeSum     = "Sum"
+	CountTypeCode    = "Code"    // code
+	CountTypeBlank   = "Blank"   // blank
+	CountTypeComment = "Comment" // comment
+	CountTypeSum     = "Sum"     // sum
 )
 
 type fileTypeCounter struct {
@@ -23,7 +23,7 @@ type fileTypeCounter struct {
 	Comment int // 注释
 }
 
-// SourceCounter
+// SourceCounter  contains the file type,and it's count
 type SourceCounter struct {
 	fc map[string]*fileTypeCounter
 }
@@ -39,7 +39,7 @@ func init() {
 	}
 }
 
-// GetInstance
+// GetInstance get an Instance
 func GetInstance() *SourceCounter {
 	return sc
 }

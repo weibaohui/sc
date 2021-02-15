@@ -31,7 +31,7 @@ func (c *Config) SetConfig(ignoreHide bool, debug bool) *Config {
 	return c
 }
 
-// GetInstance
+// GetInstance get an Instance
 func GetInstance() *Config {
 	return c
 }
