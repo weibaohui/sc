@@ -9,20 +9,21 @@ import (
 	"sc/config"
 )
 
-// 文件夹
+// Folder 文件夹
 type Folder struct {
 	Name     string
 	FullPath string
 	Hidden   bool
 }
 
+// Execute
 func (f *Folder) Execute() {
 	countFolderList(f)
 }
 
 // 按文件夹统计
 func countFolderList(f *Folder) {
-	config := config.Instant()
+	config := config.GetInstance()
 	if config.IgnoreHide && f.Hidden {
 		return
 	}
@@ -36,20 +37,20 @@ func countFolderList(f *Folder) {
 	}
 }
 
-// 列出指定路径下的文件和文件夹
+// List 列出指定路径下的文件和文件夹
 func (f *Folder) List(fullPath string) (fileList []*File, folderList []*Folder) {
 	fileInfos, err := ioutil.ReadDir(fullPath)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	config := config.Instant()
+	cfg := config.GetInstance()
 
 	for _, fi := range fileInfos {
 		hidden := strings.HasPrefix(fi.Name(), ".")
 		if fi.IsDir() {
 			// 文件夹是否在排除列表
-			for _, s := range config.Exclude {
+			for _, s := range cfg.Exclude {
 				if s == fi.Name() {
 					return
 				}

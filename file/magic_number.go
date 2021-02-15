@@ -1,6 +1,6 @@
 package file
 
-// 魔数类型
+// MagicType 魔数类型
 type MagicType struct {
 	Name   string // 类型
 	Magic  string // 魔数
@@ -8,7 +8,7 @@ type MagicType struct {
 	Skip   bool   // 跳过
 }
 
-// 魔数类型
+// Types 魔数类型
 var Types = []MagicType{
 	{Name: "binary", Magic: "CFFAEDFE", Skip: true},
 	{Name: "ZIP", Magic: "504B0304", Suffix: "zip;jar", Skip: true},

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -20,20 +21,22 @@ var rootCmd = &cobra.Command{
 	Short: "统计源码行数",
 	Long:  "按文件夹统计源码行数",
 	Run: func(cmd *cobra.Command, args []string) {
-		config.Instant().SetConfig(ignoreHide, debug)
+		cfg := config.GetInstance()
+		cfg.IgnoreHide = ignoreHide
+		cfg.Debug = debug
 		initFolder := &file.Folder{
 			FullPath: path,
 			Hidden:   false,
 		}
 		initFolder.Execute()
-		fmt.Println(counter.Instant().Sum())
+		fmt.Println(counter.GetInstance().Sum())
 	},
 }
 
 // Execute 执行
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 		os.Exit(1)
 	}
 }

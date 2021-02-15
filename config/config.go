@@ -4,19 +4,19 @@ import (
 	"sync"
 )
 
-// config 配置
-type config struct {
+// Config 配置
+type Config struct {
 	IgnoreHide bool
 	Debug      bool
 	Exclude    []string // 排除文件夹,逗号分割
 }
 
-var c *config
+var c *Config
 var once sync.Once
 
 func init() {
 	once.Do(func() {
-		c = &config{
+		c = &Config{
 			IgnoreHide: true,
 			Debug:      false,
 			Exclude:    []string{"node_modules", "vendor", "pod"},
@@ -24,13 +24,14 @@ func init() {
 	})
 }
 
-// New 创建默认的配置
-func (c *config) SetConfig(ignoreHide bool, debug bool) *config {
+// SetConfig 配置Config
+func (c *Config) SetConfig(ignoreHide bool, debug bool) *Config {
 	c.IgnoreHide = ignoreHide
 	c.Debug = debug
 	return c
 }
 
-func Instant() *config {
+// GetInstance
+func GetInstance() *Config {
 	return c
 }

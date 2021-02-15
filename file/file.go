@@ -13,7 +13,7 @@ import (
 	"sc/counter"
 )
 
-// 文件
+// File 文件
 type File struct {
 	Name     string
 	FullPath string
@@ -32,12 +32,12 @@ func countFileList(fileList []*File) {
 	}
 }
 
-// 统计行数
+// CountLines 统计行数
 func (f *File) CountLines() error {
-	counter := counter.Instant()
-	config := config.Instant()
+	sc := counter.GetInstance()
+	cfg := config.GetInstance()
 
-	if config.IgnoreHide && f.Hidden {
+	if cfg.IgnoreHide && f.Hidden {
 		return nil
 	}
 	ext := path.Ext(f.FullPath)
@@ -54,7 +54,7 @@ func (f *File) CountLines() error {
 
 		for _, magicType := range Types {
 			if strings.HasPrefix(head, magicType.Magic) {
-				if config.Debug {
+				if cfg.Debug {
 					// fmt.Printf("识别到【%s】类型文件%s,跳过=%t\n", magicType.Name, f.FullPath, magicType.Skip)
 				}
 				return nil
@@ -71,15 +71,14 @@ func (f *File) CountLines() error {
 		bytes, _, err := buf.ReadLine()
 		line := strings.TrimSpace(string(bytes))
 		if len(line) != 0 {
-			counter.Add(ext, "Code", 1)
-
+			sc.Incr(ext, counter.CountTypeCode, 1)
 		} else {
-			counter.Add(ext, "Blank", 1)
+			sc.Incr(ext, counter.CountTypeBlank, 1)
 		}
 		codeCount++
 		if err != nil {
 			if err == io.EOF {
-				if config.Debug {
+				if cfg.Debug {
 					fmt.Printf("文件 %s \t  行数 %d \t魔法数 %s \n", f.FullPath, codeCount, head)
 				}
 				return nil

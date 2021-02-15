@@ -14,30 +14,38 @@ type fileTypeCounter struct {
 	Comment int // 注释
 }
 
-// 统计器
-type sourceCounter struct {
+// SourceCounter
+type SourceCounter struct {
 	fc map[string]*fileTypeCounter
 }
 
-var sc *sourceCounter
-var once sync.Once
+var (
+	sc               *SourceCounter
+	once             sync.Once
+	CountTypeCode    = "Code"
+	CountTypeBlank   = "Blank"
+	CountTypeComment = "Comment"
+	CountTypeSum     = "Sum"
+)
 
 func init() {
 	once.Do(func() {
-		sc = &sourceCounter{
+		sc = &SourceCounter{
 			fc: make(map[string]*fileTypeCounter),
 		}
 	})
-	if config.Instant().Debug {
-		fmt.Println("sourceCounter init done")
+	if config.GetInstance().Debug {
+		fmt.Println("SourceCounter init done")
 	}
 }
 
-func Instant() *sourceCounter {
+// GetInstance
+func GetInstance() *SourceCounter {
 	return sc
 }
 
-func (s *sourceCounter) Add(fileType, countType string, count int) {
+// Incr
+func (s *SourceCounter) Incr(fileType, countType string, count int) {
 	fc := s.fc[fileType]
 	if fc == nil {
 		fc = &fileTypeCounter{
@@ -48,16 +56,17 @@ func (s *sourceCounter) Add(fileType, countType string, count int) {
 		s.fc[fileType] = fc
 	}
 	switch countType {
-	case "Code":
+	case CountTypeCode:
 		fc.Code += count
-	case "Blank":
+	case CountTypeBlank:
 		fc.Blank += count
-	case "Comment":
+	case CountTypeComment:
 		fc.Blank += count
 	}
 }
 
-func (s *sourceCounter) Sum() *sourceCounter {
+// Sum
+func (s *SourceCounter) Sum() *SourceCounter {
 
 	sum := &fileTypeCounter{
 		Code:    0,
@@ -70,18 +79,20 @@ func (s *sourceCounter) Sum() *sourceCounter {
 		sum.Comment += c.Comment
 	}
 
-	s.fc["sum"] = sum
+	s.fc[CountTypeSum] = sum
 
 	return s
 
 }
-func (s *sourceCounter) String() string {
+
+// String
+func (s *SourceCounter) String() string {
 	bytes, err := json.Marshal(s.fc)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	if config.Instant().Debug {
-		fmt.Println(string(bytes))
+	if config.GetInstance().Debug {
+		fmt.Printf("统计数据:%s", string(bytes))
 	}
 	return string(bytes)
 }
