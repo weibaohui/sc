@@ -5,13 +5,12 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
-	"io/ioutil"
-	"log"
 	"os"
 	"path"
 	"strings"
 
-	"sc/count"
+	"sc/config"
+	"sc/counter"
 )
 
 // 文件
@@ -22,25 +21,8 @@ type File struct {
 	Suffix   string
 }
 
-// 按文件夹统计
-func listFolder(f *Folder) {
-	config := count.GetSourceCounter().Config()
-	if config.IgnoreHide && f.Hidden {
-		return
-	}
-	fileList, folderList := f.List(f.FullPath)
-	// 计算文件里的代码行数
-	countFile(fileList)
-
-	// 按文件夹迭代，计算文件里的代码行数
-	for _, folder := range folderList {
-		listFolder(folder)
-	}
-
-}
-
 // 按文件统计
-func countFile(fileList []*File) {
+func countFileList(fileList []*File) {
 	for _, f := range fileList {
 		err := f.CountLines()
 		if err != nil {
@@ -50,48 +32,10 @@ func countFile(fileList []*File) {
 	}
 }
 
-// 列出指定路径下的文件和文件夹
-func (f *Folder) List(fullPath string) (fileList []*File, folderList []*Folder) {
-	fileInfos, err := ioutil.ReadDir(fullPath)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	c := count.GetSourceCounter().Config()
-
-	for _, fi := range fileInfos {
-		hidden := strings.HasPrefix(fi.Name(), ".")
-		if fi.IsDir() {
-			// 文件夹是否在排除列表
-			for _, s := range c.Exclude {
-				if s == fi.Name() {
-					return
-				}
-			}
-			folderList = append(folderList,
-				&Folder{
-					Name:     fi.Name(),
-					FullPath: path.Join(fullPath, fi.Name()),
-					Hidden:   hidden,
-				})
-		} else {
-			fileList = append(fileList,
-				&File{
-					Name:     fi.Name(),
-					FullPath: path.Join(fullPath, fi.Name()),
-					Hidden:   hidden,
-					Suffix:   path.Ext(fi.Name()),
-				})
-		}
-	}
-
-	return
-}
-
 // 统计行数
 func (f *File) CountLines() error {
-	counter := count.GetSourceCounter()
-	config := counter.Config()
+	counter := counter.Instant()
+	config := config.Instant()
 
 	if config.IgnoreHide && f.Hidden {
 		return nil

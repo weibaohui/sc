@@ -8,7 +8,6 @@ RUN ls
 
 FROM busybox
 WORKDIR /app/
-ENV INK8S=true
 COPY --from=builder /app/app .
 
 

@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"sc/config"
-	"sc/count"
+	"sc/counter"
 	"sc/file"
 )
 
@@ -20,16 +20,13 @@ var rootCmd = &cobra.Command{
 	Short: "统计源码行数",
 	Long:  "按文件夹统计源码行数",
 	Run: func(cmd *cobra.Command, args []string) {
-
-		config := config.New(ignoreHide, debug)
-		counter := count.NewSourceCounter(config)
-
+		config.Instant().SetConfig(ignoreHide, debug)
 		initFolder := &file.Folder{
 			FullPath: path,
 			Hidden:   false,
 		}
 		initFolder.Execute()
-		println(counter.Sum().String())
+		fmt.Println(counter.Instant().Sum())
 	},
 }
 
