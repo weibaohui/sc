@@ -44,7 +44,7 @@ func GetInstance() *SourceCounter {
 	return sc
 }
 
-// Incr
+// Incr increase a counter
 func (s *SourceCounter) Incr(fileType, countType string, count int) {
 	fc := s.fc[fileType]
 	if fc == nil {
@@ -65,7 +65,7 @@ func (s *SourceCounter) Incr(fileType, countType string, count int) {
 	}
 }
 
-// Sum
+// Sum sum all the count
 func (s *SourceCounter) Sum() *SourceCounter {
 
 	sum := &fileTypeCounter{
