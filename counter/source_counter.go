@@ -8,6 +8,15 @@ import (
 	"sc/config"
 )
 
+var (
+	sc               *SourceCounter
+	once             sync.Once
+	CountTypeCode    = "Code"
+	CountTypeBlank   = "Blank"
+	CountTypeComment = "Comment"
+	CountTypeSum     = "Sum"
+)
+
 type fileTypeCounter struct {
 	Code    int // 代码行数
 	Blank   int // 空行
@@ -18,15 +27,6 @@ type fileTypeCounter struct {
 type SourceCounter struct {
 	fc map[string]*fileTypeCounter
 }
-
-var (
-	sc               *SourceCounter
-	once             sync.Once
-	CountTypeCode    = "Code"
-	CountTypeBlank   = "Blank"
-	CountTypeComment = "Comment"
-	CountTypeSum     = "Sum"
-)
 
 func init() {
 	once.Do(func() {
