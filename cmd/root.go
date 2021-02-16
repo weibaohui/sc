@@ -6,9 +6,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"sc/config"
-	"sc/counter"
-	"sc/file"
+	"github.com/weibaohui/sc/config"
+	"github.com/weibaohui/sc/counter"
+	"github.com/weibaohui/sc/file"
 )
 
 var ignoreHide = true

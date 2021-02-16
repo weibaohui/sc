@@ -1,7 +1,7 @@
 package main
 
 import (
-	"sc/cmd"
+	"github.com/weibaohui/sc/cmd"
 )
 
 func main() {

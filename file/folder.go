@@ -6,7 +6,7 @@ import (
 	"path"
 	"strings"
 
-	"sc/config"
+	"github.com/weibaohui/sc/config"
 )
 
 // Folder 文件夹

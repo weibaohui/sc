@@ -9,8 +9,8 @@ import (
 	"path"
 	"strings"
 
-	"sc/config"
-	"sc/counter"
+	"github.com/weibaohui/sc/config"
+	"github.com/weibaohui/sc/counter"
 )
 
 // File 文件

@@ -1,4 +1,4 @@
-module sc
+module github.com/weibaohui/sc
 
 go 1.16
 

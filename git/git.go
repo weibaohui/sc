@@ -7,7 +7,7 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
 
-	"sc/utils"
+	"github.com/weibaohui/sc/utils"
 )
 
 type Git struct {

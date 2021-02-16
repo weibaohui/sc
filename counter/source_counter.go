@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sync"
 
-	"sc/config"
+	"github.com/weibaohui/sc/config"
 )
 
 var (
