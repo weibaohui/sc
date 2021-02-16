@@ -1,74 +1,75 @@
+// Copyright 2015 The Gogs Authors. All rights reserved.
+// Use of this source code is governed by a MIT-style
+// license that can be found in the LICENSE file.
+
 package git
 
 import (
 	"fmt"
-	"time"
-
-	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing/object"
-
-	"github.com/weibaohui/sc/utils"
+	"io"
+	"strings"
+	"sync"
 )
 
-type Git struct {
+var (
+	// logOutput is the writer to write logs. When not set, no log will be produced.
+	logOutput io.Writer
+	// logPrefix is the prefix prepend to each log entry.
+	logPrefix = "[git-module] "
+)
+
+// SetOutput sets the output writer for logs.
+func SetOutput(output io.Writer) {
+	logOutput = output
 }
 
-func GetInstance() *Git {
-	r, err := git.PlainOpen(".")
-	utils.CheckIfError(err)
-	// Length of the HEAD history
-	utils.Info("git rev-list HEAD --count")
+// SetPrefix sets the prefix to be prepended to each log entry.
+func SetPrefix(prefix string) {
+	logPrefix = prefix
+}
 
-	// ... retrieving the HEAD reference
-	ref, err := r.Head()
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-	utils.CheckIfError(err)
-
-	// ... retrieves the commit history
-	since := time.Date(2021, 2, 1, 0, 0, 0, 0, time.UTC)
-	until := time.Date(2021, 2, 16, 0, 0, 0, 0, time.UTC)
-	cIter, err := r.Log(&git.LogOptions{From: ref.Hash(), Since: &since, Until: &until})
-	utils.CheckIfError(err)
-	defer cIter.Close()
-	// ... just iterates over the commits
-	var cCount int
-	var stats []*object.FileStat = make([]*object.FileStat, 0, 1000000)
-	ticker := time.NewTicker(1 * time.Second)
-
-	go func() {
-
-		for {
-			select {
-			case <-ticker.C:
-				fmt.Println(len(stats), cCount)
-
-			}
-		}
-	}()
-
-	for {
-		c, err := cIter.Next()
-		if err != nil {
-			fmt.Println(err.Error())
-			break
-		}
-		cCount++
-
-		// fmt.Printf("%s,%s\r", c.Author.String(), c.Message)
-		fileStats, _ := c.Stats()
-		for _, stat := range fileStats {
-			stats = append(stats, &stat)
-			// fmt.Println(stat.Name,stat.Addition,stat.Deletion)
-		}
+func log(format string, args ...interface{}) {
+	if logOutput == nil {
+		return
 	}
 
-	utils.CheckIfError(err)
-	fmt.Println("allcount-", cCount, len(stats))
-	// for _, stat := range stats {
-	// 	fmt.Println(stat.String())
-	// }
-	time.Sleep(10 * time.Second)
-	return nil
+	fmt.Fprint(logOutput, logPrefix)
+	fmt.Fprintf(logOutput, format, args...)
+	fmt.Fprintln(logOutput)
+}
+
+var (
+	// gitVersion stores the Git binary version.
+	// NOTE: To check Git version should call BinVersion not this global variable.
+	gitVersion     string
+	gitVersionOnce sync.Once
+	gitVersionErr  error
+)
+
+// BinVersion returns current Git binary version that is used by this module.
+func BinVersion() (string, error) {
+	gitVersionOnce.Do(func() {
+		var stdout []byte
+		stdout, gitVersionErr = NewCommand("version").Run()
+		if gitVersionErr != nil {
+			return
+		}
+
+		fields := strings.Fields(string(stdout))
+		if len(fields) < 3 {
+			gitVersionErr = fmt.Errorf("not enough output: %s", stdout)
+			return
+		}
+
+		// Handle special case on Windows.
+		i := strings.Index(fields[2], "windows")
+		if i >= 1 {
+			gitVersion = fields[2][:i-1]
+			return
+		}
+
+		gitVersion = fields[2]
+	})
+
+	return gitVersion, gitVersionErr
 }

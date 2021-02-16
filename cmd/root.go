@@ -9,6 +9,7 @@ import (
 	"github.com/weibaohui/sc/config"
 	"github.com/weibaohui/sc/counter"
 	"github.com/weibaohui/sc/file"
+	"github.com/weibaohui/sc/git"
 )
 
 var ignoreHide = true
@@ -20,6 +21,8 @@ var rootCmd = &cobra.Command{
 	Short: "统计源码行数",
 	Long:  "按文件夹统计源码行数",
 	Run: func(cmd *cobra.Command, args []string) {
+		// git.GetInstance()
+		git.InitGitModule()
 		cfg := config.GetInstance()
 		cfg.IgnoreHide = ignoreHide
 		cfg.Debug = debug
