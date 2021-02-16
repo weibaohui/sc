@@ -4,8 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/xxjwxc/gowp/workpool"
+
 	"github.com/weibaohui/sc/utils"
 )
+
+var counts = map[string]*AuthorLinesCounter{}
 
 func InitGitModule() {
 	r, err := Open(".")
@@ -40,13 +44,19 @@ func InitGitModule() {
 		fmt.Println("遍历commits结束")
 	}
 	fmt.Println("搜索所有作者结束")
-	for name, _ := range counts {
 
-		ac := r.SumAuthor(name)
-		// fmt.Println(ac)
-		counts[name] = ac
-
+	wp := workpool.New(10)
+	for i := range counts {
+		x := counts[i]
+		wp.Do(func() error {
+			ac := r.SumAuthor(x.Author)
+			x.Addition = ac.Addition
+			x.Deletion = ac.Deletion
+			return nil
+		})
 	}
+
+	wp.Wait()
 
 	byts, _ := json.Marshal(counts)
 	fmt.Println(string(byts))
