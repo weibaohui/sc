@@ -1,8 +1,8 @@
 [![GoDev](https://img.shields.io/static/v1?label=godev&message=reference&color=00add8)](https://pkg.go.dev/github.com/weibaohui/source_count)
-[![BuildStatus](https://github.com/weibaohui/source_count/workflows/tests/badge.svg)](https://github.com/weibaohui/source_count/actions?workflow=tests)
-[![Go Report Card](https://goreportcard.com/badge/github.com/weibaohui/source_count)](https://goreportcard.com/report/github.com/weibaohui/source_count)
-[![TODOs](https://badgen.net/https/api.tickgit.com/badgen/github.com/weibaohui/source_count)](https://www.tickgit.com/browse?repo=github.com/weibaohui/source_count)
-[![codecov](https://codecov.io/gh/weibaohui/source_count/branch/master/graph/badge.svg)](https://codecov.io/gh/weibaohui/source_count)
+[![BuildStatus](https://github.com/weibaohui/sc/workflows/tests/badge.svg)](https://github.com/weibaohui/sc/actions?workflow=tests)
+[![Go Report Card](https://goreportcard.com/badge/github.com/weibaohui/sc)](https://goreportcard.com/report/github.com/weibaohui/sc)
+[![TODOs](https://badgen.net/https/api.tickgit.com/badgen/github.com/weibaohui/sc)](https://www.tickgit.com/browse?repo=github.com/weibaohui/sc)
+[![codecov](https://codecov.io/gh/weibaohui/sc/branch/master/graph/badge.svg)](https://codecov.io/gh/weibaohui/sc)
 
 # 简介
 
