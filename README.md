@@ -35,7 +35,7 @@ Flags:
 ```
 
 # docker use
-
+docker -v 挂载待扫描目录到容器里面 sc -p 扫描指定目录
 ```docker
 docker run -it --rm -v $(pwd):/code/  weibh/sc  -p /code/ -s
 ```
