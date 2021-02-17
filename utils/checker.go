@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/weibaohui/sc/config"
 )
 
 // CheckArgs should be used to ensure the right command line arguments are
@@ -18,7 +20,9 @@ func CheckIfError(err error) {
 	if err == nil {
 		return
 	}
-	fmt.Printf("\x1b[31;1m%s\x1b[0m\n", fmt.Sprintf("error: %s", err))
+	if !config.GetInstance().Silent {
+		fmt.Printf("\x1b[31;1m%s\x1b[0m\n", fmt.Sprintf("error: %s", err))
+	}
 }
 
 // Info should be used to describe the example commands that are about to run.

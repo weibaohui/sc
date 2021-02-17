@@ -47,7 +47,12 @@ type Git struct {
 
 // Execute means begin to summary the git repo
 func (g *Git) Execute() *Git {
-	r, err := Open(".")
+	path := config.GetInstance().InitPath
+	r, err := Open(path)
+	utils.CheckIfError(err)
+	if err != nil {
+		return g
+	}
 	branches, err := r.Branches()
 	utils.CheckIfError(err)
 	g.Summary.Branch = len(branches)
@@ -57,7 +62,6 @@ func (g *Git) Execute() *Git {
 		utils.CheckIfError(err)
 
 		commits, err := r.Log(id)
-		// todo 取最大值 or 每个分支的数值
 		g.Summary.Commit[branch] = len(commits)
 		utils.CheckIfError(err)
 
@@ -92,6 +96,11 @@ func (g *Git) Execute() *Git {
 func (g *Git) String() string {
 	bytes, _ := json.Marshal(g.Summary)
 	return string(bytes)
+}
+
+// Result contains Summary info
+func (g *Git) Result() *Summary {
+	return g.Summary
 }
 
 // GetInstance return an *Git

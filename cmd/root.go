@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 
@@ -10,31 +11,42 @@ import (
 	"github.com/weibaohui/sc/counter"
 	"github.com/weibaohui/sc/file"
 	"github.com/weibaohui/sc/git"
+	"github.com/weibaohui/sc/utils"
 )
 
-var ignoreHide = true
-var debug = false
-var path string
+var (
+	ignoreHide = true
+	debug      = false
+	path       string
+	silent     = false
+)
 
 var rootCmd = &cobra.Command{
 	Use:   "sc",
 	Short: "统计源码行数",
 	Long:  "按文件夹统计源码行数",
 	Run: func(cmd *cobra.Command, args []string) {
-		// git.GetInstance()
-		fmt.Println(git.GetInstance().Execute().String())
 		cfg := config.GetInstance()
 		cfg.IgnoreHide = ignoreHide
 		cfg.Debug = debug
-		// todo 初始目录 做到config 中，两种统计 从config中取
+		cfg.InitPath = path
+		cfg.Silent = silent
+
 		initFolder := &file.Folder{
-			FullPath: path,
+			FullPath: cfg.InitPath,
 			Hidden:   false,
 		}
 		initFolder.Execute()
-		fmt.Println(counter.GetInstance().Sum())
+
+		result["git"] = git.GetInstance().Execute().Result()
+		result["source"] = counter.GetInstance().Sum()
+		bytes, err := json.Marshal(result)
+		utils.CheckIfError(err)
+		fmt.Println(string(bytes))
+
 	},
 }
+var result map[string]interface{} = map[string]interface{}{}
 
 // Execute 执行
 func Execute() {
@@ -45,5 +57,6 @@ func Execute() {
 
 func init() {
 	rootCmd.Flags().BoolVarP(&debug, "debug", "d", false, "调试")
+	rootCmd.Flags().BoolVarP(&silent, "silent", "s", false, "静默执行")
 	rootCmd.Flags().StringVarP(&path, "path", "p", ".", "扫描路径")
 }
