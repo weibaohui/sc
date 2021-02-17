@@ -5,7 +5,6 @@
 package git
 
 import (
-	"errors"
 	"strings"
 	"time"
 )
@@ -22,14 +21,13 @@ func RefShortName(ref string) string {
 	} else if strings.HasPrefix(ref, RefsTags) {
 		return ref[len(RefsTags):]
 	}
-
 	return ref
 }
 
 // Reference contains information of a Git reference.
 type Reference struct {
 	ID      string
-	Refspec string
+	RefSpec string
 }
 
 // ShowRefVerifyOptions contains optional arguments for verifying a reference.
@@ -39,8 +37,6 @@ type ShowRefVerifyOptions struct {
 	// The default timeout duration will be used when not supplied.
 	Timeout time.Duration
 }
-
-var ErrReferenceNotExist = errors.New("reference does not exist")
 
 // ShowRefVerify returns the commit ID of given reference if it exists in the repository
 // in given path.
@@ -198,7 +194,7 @@ func (r *Repository) ShowRef(opts ...ShowRefOptions) ([]*Reference, error) {
 		}
 		refs = append(refs, &Reference{
 			ID:      fields[0],
-			Refspec: fields[1],
+			RefSpec: fields[1],
 		})
 	}
 	return refs, nil
@@ -213,7 +209,7 @@ func (r *Repository) Branches() ([]string, error) {
 
 	branches := make([]string, len(heads))
 	for i := range heads {
-		branches[i] = strings.TrimPrefix(heads[i].Refspec, RefsHeads)
+		branches[i] = strings.TrimPrefix(heads[i].RefSpec, RefsHeads)
 	}
 	return branches, nil
 }

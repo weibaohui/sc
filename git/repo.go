@@ -14,17 +14,20 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/xxjwxc/gowp/workpool"
+
+	"github.com/weibaohui/sc/config"
+	"github.com/weibaohui/sc/utils"
 )
 
 // Repository contains information of a Git repository.
 type Repository struct {
-	path string
-
-	cachedCommits *objectCache
-	cachedTags    *objectCache
+	path                 string
+	syncMapCachedCommits *sync.Map
+	syncMapCachedTags    *sync.Map
 }
 
 // Path returns the path of the repository.
@@ -42,8 +45,8 @@ func (r *Repository) parsePrettyFormatLogToList(timeout time.Duration, logs []by
 	}
 	ids := bytes.Split(logs, []byte{'\n'})
 	commits := make([]*Commit, 0, len(ids))
-	fmt.Println(time.Now())
-	wp := workpool.New(4)
+	concurrency := config.GetInstance().Concurrency
+	wp := workpool.New(concurrency)
 	for i := range ids {
 		x := ids[i]
 		wp.Do(func() error {
@@ -54,7 +57,6 @@ func (r *Repository) parsePrettyFormatLogToList(timeout time.Duration, logs []by
 	}
 
 	wp.Wait()
-	fmt.Println(time.Now())
 
 	return commits, nil
 }
@@ -95,14 +97,14 @@ func Open(repoPath string) (*Repository, error) {
 	repoPath, err := filepath.Abs(repoPath)
 	if err != nil {
 		return nil, err
-	} else if !isDir(repoPath) {
+	} else if !utils.IsDir(repoPath) {
 		return nil, os.ErrNotExist
 	}
 
 	return &Repository{
-		path:          repoPath,
-		cachedCommits: newObjectCache(),
-		cachedTags:    newObjectCache(),
+		path:                 repoPath,
+		syncMapCachedCommits: &sync.Map{},
+		syncMapCachedTags:    &sync.Map{},
 	}, nil
 }
 
@@ -465,7 +467,7 @@ func RepoShowNameStatus(repoPath, rev string, opts ...ShowNameStatusOptions) (*N
 	err := NewCommand("show", "--name-status", "--pretty=format:''", rev).RunInDirPipelineWithTimeout(opt.Timeout, w, stderr, repoPath)
 	_ = w.Close() // Close writer to exit parsing goroutine
 	if err != nil {
-		return nil, concatenateError(err, stderr.String())
+		return nil, utils.ConcatenateError(err, stderr.String())
 	}
 
 	<-done

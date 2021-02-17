@@ -6,37 +6,9 @@ package git
 
 import (
 	"fmt"
-	"io"
 	"strings"
 	"sync"
 )
-
-var (
-	// logOutput is the writer to write logs. When not set, no log will be produced.
-	logOutput io.Writer
-	// logPrefix is the prefix prepend to each log entry.
-	logPrefix = "[git-module] "
-)
-
-// SetOutput sets the output writer for logs.
-func SetOutput(output io.Writer) {
-	logOutput = output
-}
-
-// SetPrefix sets the prefix to be prepended to each log entry.
-func SetPrefix(prefix string) {
-	logPrefix = prefix
-}
-
-func log(format string, args ...interface{}) {
-	if logOutput == nil {
-		return
-	}
-
-	fmt.Fprint(logOutput, logPrefix)
-	fmt.Fprintf(logOutput, format, args...)
-	fmt.Fprintln(logOutput)
-}
 
 var (
 	// gitVersion stores the Git binary version.

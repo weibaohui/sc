@@ -16,7 +16,7 @@ type Signature struct {
 	Name string
 	// The email address.
 	Email string
-	// The time of the signurate.
+	// The time of the signature.
 	When time.Time
 }
 

@@ -80,10 +80,8 @@ func (r *Repository) CatFileCommit(rev string, opts ...CatFileCommitOptions) (*C
 	if len(opts) > 0 {
 		opt = opts[0]
 	}
-
-	cache, ok := r.cachedCommits.Get(rev)
+	cache, ok := r.syncMapCachedCommits.Load(rev)
 	if ok {
-		log("Cached commit hit: %s", rev)
 		return cache.(*Commit), nil
 	}
 
@@ -104,7 +102,7 @@ func (r *Repository) CatFileCommit(rev string, opts ...CatFileCommitOptions) (*C
 	c.repo = r
 	c.ID = MustIDFromString(commitID)
 
-	r.cachedCommits.Set(commitID, c)
+	r.syncMapCachedCommits.Store(commitID, c)
 	return c, nil
 }
 
@@ -117,7 +115,7 @@ type CatFileTypeOptions struct {
 }
 
 // CatFileType returns the object type of given revision of the repository.
-func (r *Repository) CatFileType(rev string, opts ...CatFileTypeOptions) (ObjectType, error) {
+func (r *Repository) CatFileType(rev string, opts ...CatFileTypeOptions) (string, error) {
 	var opt CatFileTypeOptions
 	if len(opts) > 0 {
 		opt = opts[0]
@@ -128,7 +126,7 @@ func (r *Repository) CatFileType(rev string, opts ...CatFileTypeOptions) (Object
 		return "", err
 	}
 	typ = bytes.TrimSpace(typ)
-	return ObjectType(typ), nil
+	return string(typ), nil
 }
 
 // BranchCommit returns the latest commit of given branch of the repository.
@@ -186,27 +184,15 @@ func RepoLog(repoPath, rev string, opts ...LogOptions) ([]*Commit, error) {
 	return r.Log(rev, opts...)
 }
 
-type AuthorLinesCounters map[string]*AuthorLinesCounter
-type AuthorLinesCounter struct {
-	Author      string
-	CommitCount int // 提交次数
-	Addition    int // 增加
-	Deletion    int // 删除
-}
-
-func (a *AuthorLinesCounter) String() string {
-	return fmt.Sprintf("%s commit count %d,added %d,deleted %d", a.Author, a.CommitCount, a.Addition, a.Deletion)
-}
-
 func (r *Repository) SumAuthor(authorName string) *AuthorLinesCounter {
-
+	// fmt.Println("统计作者", authorName, time.Now())
 	cmd := NewCommand("log")
 	cmd.AddArgs("--author=" + authorName)
 	cmd.AddArgs("--pretty=tformat:")
 	cmd.AddArgs("--numstat")
 	stdout, err := cmd.RunInDirWithTimeout(time.Second, r.path)
 	if err != nil {
-		fmt.Println(err.Error())
+		// fmt.Println(err.Error())
 		return nil
 	}
 
@@ -259,9 +245,7 @@ func (r *Repository) Log(rev string, opts ...LogOptions) ([]*Commit, error) {
 		cmd.AddArgs(escapePath(opt.Path))
 	}
 
-	fmt.Println(time.Now())
 	stdout, err := cmd.RunInDirWithTimeout(opt.Timeout, r.path)
-	fmt.Println(time.Now())
 
 	if err != nil {
 		return nil, err

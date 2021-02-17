@@ -5,12 +5,7 @@
 package git
 
 import (
-	"bytes"
-	"io"
-	"io/ioutil"
-	"net/http"
 	"strings"
-	"sync"
 )
 
 // Commit contains information of a Git commit.
@@ -26,10 +21,6 @@ type Commit struct {
 
 	parents []*SHA1
 	*Tree
-
-	submodules     Submodules
-	submodulesOnce sync.Once
-	submodulesErr  error
 }
 
 // Summary returns first line of commit message.
@@ -115,58 +106,4 @@ func (c *Commit) Ancestors(opts ...LogOptions) ([]*Commit, error) {
 	opt.Skip++
 
 	return c.repo.Log(c.ID.String(), opt)
-}
-
-type limitWriter struct {
-	W io.Writer
-	N int64
-}
-
-func (w *limitWriter) Write(p []byte) (int, error) {
-	if w.N <= 0 {
-		return len(p), nil
-	}
-
-	limit := int64(len(p))
-	if limit > w.N {
-		limit = w.N
-	}
-	n, err := w.W.Write(p[:limit])
-	w.N -= int64(n)
-
-	// Prevent "short write" error
-	return len(p), err
-}
-
-func (c *Commit) isImageFile(blob *Blob, err error) (bool, error) {
-	if err != nil {
-		if err == ErrNotBlob {
-			return false, nil
-		}
-		return false, err
-	}
-
-	buf := new(bytes.Buffer)
-	buf.Grow(512)
-	stdout := &limitWriter{
-		W: buf,
-		N: int64(buf.Cap()),
-	}
-
-	err = blob.Pipeline(stdout, ioutil.Discard)
-	if err != nil {
-		return false, err
-	}
-
-	return strings.Contains(http.DetectContentType(buf.Bytes()), "image/"), nil
-}
-
-// IsImageFile returns true if the blob of the commit is an image by subpath.
-func (c *Commit) IsImageFile(subpath string) (bool, error) {
-	return c.isImageFile(c.Blob(subpath))
-}
-
-// IsImageFileByIndex returns true if the blob of the commit is an image by index.
-func (c *Commit) IsImageFileByIndex(index string) (bool, error) {
-	return c.isImageFile(c.BlobByIndex(index))
 }
