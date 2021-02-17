@@ -113,6 +113,7 @@ func (g *Git) GoExecute() *Git {
 				}
 
 			} else {
+				// 已经处理过的作者，直接跳过，标记为已处理
 				channel.Process(c)
 			}
 		}
