@@ -6,7 +6,8 @@ RUN ls
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags '-d -w -s ' -a -installsuffix cgo -o app .
 RUN ls
 
-FROM busybox
+FROM alipine
+RUN apk add --no-cache ca-certificates  tzdata git
 WORKDIR /app/
 COPY --from=builder /app/app .
 
