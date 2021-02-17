@@ -1,14 +1,20 @@
 package config
 
 import (
+	"runtime"
 	"sync"
 )
 
+var defaultConcurrency = runtime.GOMAXPROCS(0)
+
 // Config 配置
 type Config struct {
-	IgnoreHide bool
-	Debug      bool
-	Exclude    []string // 排除文件夹,逗号分割
+	InitPath    string // 初始化路径
+	IgnoreHide  bool
+	Debug       bool
+	Exclude     []string // 排除文件夹,逗号分割
+	Concurrency int
+	Silent      bool // 静默
 }
 
 var c *Config
@@ -17,9 +23,12 @@ var once sync.Once
 func init() {
 	once.Do(func() {
 		c = &Config{
-			IgnoreHide: true,
-			Debug:      false,
-			Exclude:    []string{"node_modules", "vendor", "pod"},
+			InitPath:    ".",
+			IgnoreHide:  true,
+			Debug:       false,
+			Exclude:     []string{"node_modules", "vendor", "pod"},
+			Concurrency: defaultConcurrency,
+			Silent:      false,
 		}
 	})
 }

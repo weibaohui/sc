@@ -25,13 +25,13 @@ type fileTypeCounter struct {
 
 // SourceCounter  contains the file type,and it's count
 type SourceCounter struct {
-	fc map[string]*fileTypeCounter
+	FileTypeCounter map[string]*fileTypeCounter
 }
 
 func init() {
 	once.Do(func() {
 		sc = &SourceCounter{
-			fc: make(map[string]*fileTypeCounter),
+			FileTypeCounter: make(map[string]*fileTypeCounter),
 		}
 	})
 	if config.GetInstance().Debug {
@@ -46,14 +46,14 @@ func GetInstance() *SourceCounter {
 
 // Incr increase a counter
 func (s *SourceCounter) Incr(fileType, countType string, count int) {
-	fc := s.fc[fileType]
+	fc := s.FileTypeCounter[fileType]
 	if fc == nil {
 		fc = &fileTypeCounter{
 			Code:    0,
 			Blank:   0,
 			Comment: 0,
 		}
-		s.fc[fileType] = fc
+		s.FileTypeCounter[fileType] = fc
 	}
 	switch countType {
 	case CountTypeCode:
@@ -73,13 +73,13 @@ func (s *SourceCounter) Sum() *SourceCounter {
 		Blank:   0,
 		Comment: 0,
 	}
-	for _, c := range s.fc {
+	for _, c := range s.FileTypeCounter {
 		sum.Code += c.Code
 		sum.Blank += c.Blank
 		sum.Comment += c.Comment
 	}
 
-	s.fc[CountTypeSum] = sum
+	s.FileTypeCounter[CountTypeSum] = sum
 
 	return s
 
@@ -87,7 +87,7 @@ func (s *SourceCounter) Sum() *SourceCounter {
 
 // String
 func (s *SourceCounter) String() string {
-	bytes, err := json.Marshal(s.fc)
+	bytes, err := json.Marshal(s.FileTypeCounter)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
@@ -95,4 +95,8 @@ func (s *SourceCounter) String() string {
 		fmt.Printf("统计数据:%s", string(bytes))
 	}
 	return string(bytes)
+}
+
+func (s *SourceCounter) Result() map[string]*fileTypeCounter {
+	return s.FileTypeCounter
 }
