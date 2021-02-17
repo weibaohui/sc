@@ -17,4 +17,4 @@ jobs:
       - name: ls
         run: ls
       - name: run test
-        run: docker run -t --rm -v $(pwd):/code/  weibh/sc  -p /code/ -s
+        run: docker run -t --rm -v $(pwd):/code/  weibh/sc  -p /code/ -s | jq .
