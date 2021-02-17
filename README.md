@@ -36,38 +36,70 @@ Flags:
 
 ```json
 {
-  "": {
-    "Code": 10,
-    "Blank": 4,
-    "Comment": 0
+  "git": {
+    "Branch": 2,
+    "Tags": 0,
+    "Commit": {
+      "git": 56,
+      "main": 62
+    },
+    "AuthorCounts": {
+      "weibaohui@chinamobile.com": {
+        "Email": "weibaohui@chinamobile.com",
+        "Name": "weibh",
+        "CommitCount": 61,
+        "Addition": 1442,
+        "Deletion": 559
+      },
+      "weibaohui@yeah.net": {
+        "Email": "weibaohui@yeah.net",
+        "Name": "weibaohui",
+        "CommitCount": 163,
+        "Addition": 9638,
+        "Deletion": 7235
+      }
+    }
   },
-  ".go": {
-    "Code": 341,
-    "Blank": 52,
-    "Comment": 0
-  },
-  ".md": {
-    "Code": 15,
-    "Blank": 6,
-    "Comment": 0
-  },
-  ".mod": {
-    "Code": 1,
-    "Blank": 1,
-    "Comment": 0
-  },
-  ".sum": {
-    "Code": 286,
-    "Blank": 1,
-    "Comment": 0
-  },
-  "sum": {
-    "Code": 653,
-    "Blank": 64,
-    "Comment": 0
+  "source": {
+    "FileTypeCounter": {
+      "": {
+        "Code": 26,
+        "Blank": 8,
+        "Comment": 0
+      },
+      ".go": {
+        "Code": 2166,
+        "Blank": 338,
+        "Comment": 0
+      },
+      ".log": {
+        "Code": 1,
+        "Blank": 1,
+        "Comment": 0
+      },
+      ".md": {
+        "Code": 64,
+        "Blank": 17,
+        "Comment": 0
+      },
+      ".mod": {
+        "Code": 8,
+        "Blank": 4,
+        "Comment": 0
+      },
+      ".sum": {
+        "Code": 421,
+        "Blank": 1,
+        "Comment": 0
+      },
+      "Sum": {
+        "Code": 2686,
+        "Blank": 369,
+        "Comment": 0
+      }
+    }
   }
 }
-
 ```
 
 # 说明
