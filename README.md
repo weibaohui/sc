@@ -120,3 +120,7 @@ docker run -it --rm -v $(pwd):/code/  weibh/sc  -p /code/ -s
 
 - docker √
 - git ing
+
+## Thanks
+
+感谢 [JetBrains 公司](https://www.jetbrains.com/?from=sc) 为本开源项目提供的免费正版 Intellij GoLand 的 License 支持。
