@@ -35,11 +35,11 @@ func (a *AuthorLinesCounter) String() string {
 
 type Summary struct {
 	Branch          int
+	Tags            int
 	Commit          map[string]int
 	AuthorCounts    map[string]*AuthorLinesCounter
-	Tags            int
-	authorCountsMap *sync.Map             // 并发使用
 	authorList      map[string]*Signature // 用户列表
+	authorCountsMap *sync.Map             // 并发使用
 }
 type Git struct {
 	Summary *Summary
