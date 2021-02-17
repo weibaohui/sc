@@ -184,10 +184,10 @@ func RepoLog(repoPath, rev string, opts ...LogOptions) ([]*Commit, error) {
 	return r.Log(rev, opts...)
 }
 
-func (r *Repository) SumAuthor(authorName string) *AuthorLinesCounter {
-	// fmt.Println("统计作者", authorName, time.Now())
+func (r *Repository) SumAuthor(author *Signature) *AuthorLinesCounter {
+	// fmt.Println("统计作者", author, time.Now())
 	cmd := NewCommand("log")
-	cmd.AddArgs("--author=" + authorName)
+	cmd.AddArgs("--author=" + author.Email)
 	cmd.AddArgs("--pretty=tformat:")
 	cmd.AddArgs("--numstat")
 	stdout, err := cmd.RunInDirWithTimeout(time.Second, r.path)
@@ -197,7 +197,8 @@ func (r *Repository) SumAuthor(authorName string) *AuthorLinesCounter {
 	}
 
 	ac := &AuthorLinesCounter{
-		Author:   authorName,
+		Email:    author.Email,
+		Name:     author.Name,
 		Addition: 0,
 		Deletion: 0,
 	}

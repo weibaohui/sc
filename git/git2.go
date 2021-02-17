@@ -22,14 +22,15 @@ func checkOut() {
 
 type AuthorLinesCounters map[string]*AuthorLinesCounter
 type AuthorLinesCounter struct {
-	Author      string
-	CommitCount int // 提交次数
-	Addition    int // 增加
-	Deletion    int // 删除
+	Email       string // 作者邮箱
+	Name        string // 作者名称
+	CommitCount int    // 提交次数
+	Addition    int    // 增加
+	Deletion    int    // 删除
 }
 
 func (a *AuthorLinesCounter) String() string {
-	return fmt.Sprintf("%s commit count %d,added %d,deleted %d", a.Author, a.CommitCount, a.Addition, a.Deletion)
+	return fmt.Sprintf("%s(%s) commit count %d,added %d,deleted %d", a.Email, a.Name, a.CommitCount, a.Addition, a.Deletion)
 }
 
 type Summary struct {
@@ -37,8 +38,8 @@ type Summary struct {
 	Commit          int
 	AuthorCounts    map[string]*AuthorLinesCounter
 	Tags            int
-	authorCountsMap *sync.Map         // 并发使用
-	authorList      map[string]string // 用户列表
+	authorCountsMap *sync.Map             // 并发使用
+	authorList      map[string]*Signature // 用户列表
 }
 type Git struct {
 	Summary *Summary
@@ -60,8 +61,8 @@ func (g *Git) Execute() *Git {
 		utils.CheckIfError(err)
 
 		for _, c := range commits {
-			if g.Summary.authorList[c.Author.Name] == "" {
-				g.Summary.authorList[c.Author.Name] = c.Author.Name
+			if g.Summary.authorList[c.Author.Email] == nil {
+				g.Summary.authorList[c.Author.Email] = c.Author
 			}
 		}
 	}
@@ -69,10 +70,10 @@ func (g *Git) Execute() *Git {
 	concurrency := config.GetInstance().Concurrency
 	wp := workpool.New(concurrency)
 	for i := range g.Summary.authorList {
-		name := g.Summary.authorList[i]
+		author := g.Summary.authorList[i]
 		wp.Do(func() error {
-			ac := r.SumAuthor(name)
-			g.Summary.authorCountsMap.LoadOrStore(name, ac)
+			ac := r.SumAuthor(author)
+			g.Summary.authorCountsMap.LoadOrStore(author.Email, ac)
 			return nil
 		})
 	}
@@ -104,7 +105,7 @@ func init() {
 			AuthorCounts:    map[string]*AuthorLinesCounter{},
 			Tags:            0,
 			authorCountsMap: &sync.Map{},
-			authorList:      map[string]string{},
+			authorList:      map[string]*Signature{},
 		}
 	})
 }
