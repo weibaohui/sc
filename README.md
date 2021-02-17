@@ -31,13 +31,12 @@ Flags:
   -d, --debug         调试
   -h, --help          help for sc
   -p, --path string   扫描路径 (default ".")
-  -s, --silent        静默执行
 ```
 
 # docker use
 docker -v 挂载待扫描目录到容器里面 sc -p 扫描指定目录
 ```docker
-docker run -it --rm -v $(pwd):/code/  weibh/sc  -p /code/ -s
+docker run -it --rm -v $(pwd):/code/  weibh/sc  -p /code/ 
 ```
 
 # 输出值
