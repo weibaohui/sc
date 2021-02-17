@@ -19,4 +19,4 @@ jobs:
       - name: run test
         run: docker run -t --rm -v $(pwd):/code/  weibh/sc  -p /code/  | jq .
       - name: run test
-        run: docker run -t --rm -v $(pwd):/code/  weibh/sc -d  -p /code/  | jq .
+        run: docker run -t --rm -v $(pwd):/code/  weibh/sc -d  -p /code/
