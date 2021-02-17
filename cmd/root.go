@@ -38,7 +38,14 @@ var rootCmd = &cobra.Command{
 		}
 		initFolder.Execute()
 
-		result["git"] = git.GetInstance().Execute().Result()
+		// 检查git 是否已经安装
+		if _, err := git.BinVersion(); err == nil {
+			result["git"] = git.GetInstance().Execute().Result()
+		} else {
+			if !cfg.Silent {
+				fmt.Println("当前系统未安装git，暂不统计git信息")
+			}
+		}
 		result["source"] = counter.GetInstance().Sum()
 		bytes, err := json.Marshal(result)
 		utils.CheckIfError(err)
@@ -46,7 +53,7 @@ var rootCmd = &cobra.Command{
 
 	},
 }
-var result map[string]interface{} = map[string]interface{}{}
+var result = map[string]interface{}{}
 
 // Execute 执行
 func Execute() {
