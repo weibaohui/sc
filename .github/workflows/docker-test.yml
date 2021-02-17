@@ -1,0 +1,20 @@
+name: Docker Run Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: ls
+        run: ls
+      - name: run test
+        run: docker run -it --rm -v $(pwd):/code/  weibh/sc  -p /code/ -s
