@@ -37,6 +37,7 @@ type Summary struct {
 	authorCountsMap *sync.Map             // 并发统计结果
 	CurrentBranch   string                // 当前分支
 	ing             *sync.Map             // 当前处理中的数据
+	rwMutex         sync.RWMutex
 }
 type Git struct {
 	Summary *Summary
@@ -75,11 +76,11 @@ func (g *Git) GoExecute() *Git {
 	go func() {
 		concurrency := config.GetInstance().Concurrency
 		wp := workpool.New(concurrency * 3)
-
 		for c := range commitChan.AuthorEmail {
 			_, exists := g.Summary.authorCountsMap.Load(c.Author.Email)
 			if !exists {
 				cc := c
+				// todo 并发写入同一个用户名，如何去重，防止重复查找
 				if _, ingOk := g.Summary.ing.Load(c.Author.Email); ingOk {
 					// 正在处理中，那么计数器累加一
 					// 当收到的跟已处理的计数器值相等时，认为处理完毕
@@ -87,28 +88,33 @@ func (g *Git) GoExecute() *Git {
 				} else {
 					// 不在处理中，那么新开处理器
 					// 1、加入到ing处理队列中
-					g.Summary.ing.Store(c.Author.Email, nil)
-					wp.Do(func() error {
-						Debugf("统计作者%s\n", cc.Author.Email)
-						ac := g.repo.SumAuthor(cc.Author)
-						if ac != nil {
-							g.Summary.authorCountsMap.Store(cc.Author.Email, ac)
-						}
-						// debug 查看
-						if config.GetInstance().Debug {
-							if v, ok := g.Summary.authorCountsMap.Load(cc.Author.Email); ok && v != nil {
-								tmp := v.(*AuthorLinesCounter)
-								if tmp != nil {
-									Debugf("%s[%s]:提交%d次,%d+,%d-\n", tmp.Name, tmp.Email, tmp.CommitCount, tmp.Addition, tmp.Deletion)
+					// 再次确认
+					if _, ingOk := g.Summary.ing.Load(c.Author.Email); ingOk {
+						channel.Process(c)
+					} else {
+						g.Summary.ing.Store(c.Author.Email, "")
+						wp.Do(func() error {
+							Debugf("统计作者%s\n", cc.Author.Email)
+							ac := g.repo.SumAuthor(cc.Author)
+							if ac != nil {
+								g.Summary.authorCountsMap.Store(cc.Author.Email, ac)
+							}
+							// debug 查看
+							if config.GetInstance().Debug {
+								if v, ok := g.Summary.authorCountsMap.Load(cc.Author.Email); ok && v != nil {
+									tmp := v.(*AuthorLinesCounter)
+									if tmp != nil {
+										Debugf("%s[%s]:提交%d次,%d+,%d-\n", tmp.Name, tmp.Email, tmp.CommitCount, tmp.Addition, tmp.Deletion)
+									}
 								}
 							}
-						}
-						// 3、完成处理
-						channel.Process(c)
-						// 2、 处理完成，从ing中删除
-						g.Summary.ing.Delete(c.Author.Email)
-						return nil
-					})
+							// 3、完成处理
+							channel.Process(c)
+							// 2、 处理完成，从ing中删除
+							g.Summary.ing.Delete(c.Author.Email)
+							return nil
+						})
+					}
 
 				}
 
@@ -116,6 +122,7 @@ func (g *Git) GoExecute() *Git {
 				// 已经处理过的作者，直接跳过，标记为已处理
 				channel.Process(c)
 			}
+
 		}
 		wp.Wait()
 
@@ -183,6 +190,7 @@ func init() {
 			authorCountsMap: &sync.Map{},
 			CurrentBranch:   "",
 			ing:             &sync.Map{},
+			rwMutex:         sync.RWMutex{},
 		}
 	})
 }
