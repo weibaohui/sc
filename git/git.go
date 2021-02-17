@@ -77,7 +77,19 @@ func (g *Git) GoExecute() *Git {
 				if !exists {
 					Debugf("统计作者%s\n", c.Author.Email)
 					ac := g.repo.SumAuthor(c.Author)
-					g.Summary.authorCountsMap.Store(c.Author.Email, ac)
+					if ac != nil {
+						g.Summary.authorCountsMap.Store(c.Author.Email, ac)
+					}
+					// debug 查看
+					if config.GetInstance().Debug {
+						if v, ok := g.Summary.authorCountsMap.Load(c.Author.Email); ok && v != nil {
+							tmp := v.(*AuthorLinesCounter)
+							if tmp != nil {
+								Debugf("%s[%s]:提交%d次,%d+,%d-\n", tmp.Name, tmp.Email, tmp.CommitCount, tmp.Addition, tmp.Deletion)
+							}
+						}
+					}
+
 				}
 				channel.Process(c)
 			case <-timer.C:

@@ -170,17 +170,19 @@ func (r *Repository) SumAuthor(author *Signature) *AuthorLinesCounter {
 	cmd.AddArgs("--author=" + author.Email)
 	cmd.AddArgs("--pretty=tformat:")
 	cmd.AddArgs("--numstat")
-	stdout, err := cmd.RunInDirWithTimeout(time.Second, r.path)
+	stdout, err := cmd.RunInDirWithTimeout(DefaultTimeout, r.path)
 	if err != nil {
 		// fmt.Println(err.Error())
+		Debug(err.Error())
 		return nil
 	}
 
 	ac := &AuthorLinesCounter{
-		Email:    author.Email,
-		Name:     author.Name,
-		Addition: 0,
-		Deletion: 0,
+		Email:       author.Email,
+		Name:        author.Name,
+		Addition:    0,
+		Deletion:    0,
+		CommitCount: 0,
 	}
 	lines := bytes.Split(stdout, []byte{'\n'})
 	ac.CommitCount = len(lines)
