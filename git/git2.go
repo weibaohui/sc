@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/xxjwxc/gowp/workpool"
 
@@ -43,6 +44,7 @@ type Summary struct {
 }
 type Git struct {
 	Summary *Summary
+	repo    *Repository
 }
 
 // Execute means begin to summary the git repo
@@ -53,6 +55,7 @@ func (g *Git) Execute() *Git {
 	if err != nil {
 		return g
 	}
+	g.repo = r
 	branches, err := r.Branches()
 	utils.CheckIfError(err)
 	g.Summary.Branch = len(branches)
@@ -78,7 +81,7 @@ func (g *Git) Execute() *Git {
 		author := g.Summary.authorList[i]
 		wp.Do(func() error {
 			ac := r.SumAuthor(author)
-			g.Summary.authorCountsMap.LoadOrStore(author.Email, ac)
+			g.Summary.authorCountsMap.Store(author.Email, ac)
 			return nil
 		})
 	}
@@ -90,6 +93,43 @@ func (g *Git) Execute() *Git {
 	})
 
 	return g
+}
+
+// Execute means begin to summary the git repo
+func (g *Git) GoExecute() *Git {
+
+	branches, err := g.repo.Branches()
+	utils.CheckIfError(err)
+	g.Summary.Branch = len(branches)
+
+	go func() {
+		for _, branch := range branches {
+			id, err := g.repo.BranchCommitID(branch)
+			utils.CheckIfError(err)
+
+			err = g.repo.LogGo(id)
+			utils.CheckIfError(err)
+		}
+	}()
+
+	channel := GetChanInstance()
+	go channel.Sum()
+	timer1 := time.NewTicker(time.Second * 2)
+	for {
+		select {
+		case <-timer1.C:
+			Debug(".")
+
+		case <-channel.Done:
+			Debug("over")
+			g.Summary.authorCountsMap.Range(func(k, v interface{}) bool {
+				g.Summary.AuthorCounts[k.(string)] = v.(*AuthorLinesCounter)
+				return true
+			})
+			return g
+		}
+	}
+
 }
 
 // String implement Stringer
@@ -105,8 +145,13 @@ func (g *Git) Result() *Summary {
 
 // GetInstance return an *Git
 func GetInstance() *Git {
+	path := config.GetInstance().InitPath
+	r, err := Open(path)
+	utils.CheckIfError(err)
+
 	return &Git{
 		Summary: summary,
+		repo:    r,
 	}
 }
 func init() {

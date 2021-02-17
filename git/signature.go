@@ -6,7 +6,6 @@ package git
 
 import (
 	"bytes"
-	"strconv"
 	"time"
 )
 
@@ -33,23 +32,23 @@ func parseSignature(line []byte) (*Signature, error) {
 		Email: string(line[emailStart+1 : emailEnd]),
 	}
 
-	// Check the date format
-	firstChar := line[emailEnd+2]
-	if firstChar >= 48 && firstChar <= 57 { // ASCII code for 0-9
-		timestop := bytes.IndexByte(line[emailEnd+2:], ' ')
-		timestamp := line[emailEnd+2 : emailEnd+2+timestop]
-		seconds, err := strconv.ParseInt(string(timestamp), 10, 64)
-		if err != nil {
-			return nil, err
-		}
-		sig.When = time.Unix(seconds, 0)
-		return sig, nil
-	}
-
-	var err error
-	sig.When, err = time.Parse("Mon Jan _2 15:04:05 2006 -0700", string(line[emailEnd+2:]))
-	if err != nil {
-		return nil, err
-	}
+	// // Check the date format
+	// firstChar := line[emailEnd+2]
+	// if firstChar >= 48 && firstChar <= 57 { // ASCII code for 0-9
+	// 	timestop := bytes.IndexByte(line[emailEnd+2:], ' ')
+	// 	timestamp := line[emailEnd+2 : emailEnd+2+timestop]
+	// 	seconds, err := strconv.ParseInt(string(timestamp), 10, 64)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// 	sig.When = time.Unix(seconds, 0)
+	// 	return sig, nil
+	// }
+	//
+	// var err error
+	// sig.When, err = time.Parse("Mon Jan _2 15:04:05 2006 -0700", string(line[emailEnd+2:]))
+	// if err != nil {
+	// 	return nil, err
+	// }
 	return sig, nil
 }

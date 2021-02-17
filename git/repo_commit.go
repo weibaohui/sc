@@ -28,19 +28,19 @@ loop:
 			spacepos := bytes.IndexByte(line, ' ')
 			reftype := line[:spacepos]
 			switch string(reftype) {
-			case "tree", "object":
-				id, err := NewIDFromString(string(line[spacepos+1:]))
-				if err != nil {
-					return nil, err
-				}
-				commit.Tree = &Tree{id: id}
-			case "parent":
-				// A commit can have one or more parents
-				id, err := NewIDFromString(string(line[spacepos+1:]))
-				if err != nil {
-					return nil, err
-				}
-				commit.parents = append(commit.parents, id)
+			// case "tree", "object":
+			// 	id, err := NewIDFromString(string(line[spacepos+1:]))
+			// 	if err != nil {
+			// 		return nil, err
+			// 	}
+			// 	commit.Tree = &Tree{id: id}
+			// case "parent":
+			// 	// A commit can have one or more parents
+			// 	id, err := NewIDFromString(string(line[spacepos+1:]))
+			// 	if err != nil {
+			// 		return nil, err
+			// 	}
+			// 	commit.parents = append(commit.parents, id)
 			case "author", "tagger":
 				sig, err := parseSignature(line[spacepos+1:])
 				if err != nil {
@@ -85,12 +85,7 @@ func (r *Repository) CatFileCommit(rev string, opts ...CatFileCommitOptions) (*C
 		return cache.(*Commit), nil
 	}
 
-	commitID, err := r.RevParse(rev, RevParseOptions{Timeout: opt.Timeout}) // nolint
-	if err != nil {
-		return nil, err
-	}
-
-	stdout, err := NewCommand("cat-file", "commit", commitID).RunInDirWithTimeout(opt.Timeout, r.path)
+	stdout, err := NewCommand("cat-file", "commit", rev).RunInDirWithTimeout(opt.Timeout, r.path)
 	if err != nil {
 		return nil, err
 	}
@@ -99,10 +94,8 @@ func (r *Repository) CatFileCommit(rev string, opts ...CatFileCommitOptions) (*C
 	if err != nil {
 		return nil, err
 	}
-	c.repo = r
-	c.ID = MustIDFromString(commitID)
 
-	r.syncMapCachedCommits.Store(commitID, c)
+	r.syncMapCachedCommits.Store(rev, c)
 	return c, nil
 }
 
@@ -247,11 +240,44 @@ func (r *Repository) Log(rev string, opts ...LogOptions) ([]*Commit, error) {
 	}
 
 	stdout, err := cmd.RunInDirWithTimeout(opt.Timeout, r.path)
-
 	if err != nil {
 		return nil, err
 	}
 	return r.parsePrettyFormatLogToList(opt.Timeout, stdout)
+}
+
+func (r *Repository) LogGo(rev string, opts ...LogOptions) error {
+	var opt LogOptions
+	if len(opts) > 0 {
+		opt = opts[0]
+	}
+
+	cmd := NewCommand("log", "--pretty="+LogFormatHashOnly, rev)
+	if opt.MaxCount > 0 {
+		cmd.AddArgs("--max-count=" + strconv.Itoa(opt.MaxCount))
+	}
+	if opt.Skip > 0 {
+		cmd.AddArgs("--skip=" + strconv.Itoa(opt.Skip))
+	}
+	if !opt.Since.IsZero() {
+		cmd.AddArgs("--since=" + opt.Since.Format(time.RFC3339))
+	}
+	if opt.GrepPattern != "" {
+		cmd.AddArgs("--grep=" + opt.GrepPattern)
+	}
+	if opt.RegexpIgnoreCase {
+		cmd.AddArgs("--regexp-ignore-case")
+	}
+	cmd.AddArgs("--")
+	if opt.Path != "" {
+		cmd.AddArgs(escapePath(opt.Path))
+	}
+
+	stdout, err := cmd.RunInDirWithTimeout(opt.Timeout, r.path)
+	if err != nil {
+		return err
+	}
+	return r.parsePrettyFormatLogToListGo(opt.Timeout, stdout)
 }
 
 // CommitByRevisionOptions contains optional arguments for getting a commit.

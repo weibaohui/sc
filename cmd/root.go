@@ -34,7 +34,7 @@ var rootCmd = &cobra.Command{
 
 		// 检查git 是否已经安装
 		if _, err := git.BinVersion(); err == nil {
-			result["git"] = git.GetInstance().Execute().Result()
+			result["git"] = git.GetInstance().GoExecute().Result()
 		} else {
 			if !cfg.Silent {
 				fmt.Println("当前系统未安装git，暂不统计git信息")
