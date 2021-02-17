@@ -6,20 +6,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/xxjwxc/gowp/workpool"
-
 	"github.com/weibaohui/sc/config"
 	"github.com/weibaohui/sc/utils"
 )
 
 var once = sync.Once{}
 var summary *Summary
-
-func checkOut() {
-	r, err := Open(".")
-	utils.CheckIfError(err)
-	r.Checkout("git")
-}
 
 type AuthorLinesCounters map[string]*AuthorLinesCounter
 type AuthorLinesCounter struct {
@@ -48,79 +40,56 @@ type Git struct {
 }
 
 // Execute means begin to summary the git repo
-func (g *Git) Execute() *Git {
-	path := config.GetInstance().InitPath
-	r, err := Open(path)
-	utils.CheckIfError(err)
-	if err != nil {
-		return g
-	}
-	g.repo = r
-	branches, err := r.Branches()
-	utils.CheckIfError(err)
-	g.Summary.Branch = len(branches)
-
-	for _, branch := range branches {
-		id, err := r.BranchCommitID(branch)
-		utils.CheckIfError(err)
-
-		commits, err := r.Log(id)
-		g.Summary.Commit[branch] = len(commits)
-		utils.CheckIfError(err)
-
-		for _, c := range commits {
-			if g.Summary.authorList[c.Author.Email] == nil {
-				g.Summary.authorList[c.Author.Email] = c.Author
-			}
-		}
-	}
-
-	concurrency := config.GetInstance().Concurrency
-	wp := workpool.New(concurrency)
-	for i := range g.Summary.authorList {
-		author := g.Summary.authorList[i]
-		wp.Do(func() error {
-			ac := r.SumAuthor(author)
-			g.Summary.authorCountsMap.Store(author.Email, ac)
-			return nil
-		})
-	}
-	err = wp.Wait()
-	utils.CheckIfError(err)
-	g.Summary.authorCountsMap.Range(func(k, v interface{}) bool {
-		g.Summary.AuthorCounts[k.(string)] = v.(*AuthorLinesCounter)
-		return true
-	})
-
-	return g
-}
-
-// Execute means begin to summary the git repo
 func (g *Git) GoExecute() *Git {
+	channel := GetChanInstance()
+	timer := time.NewTicker(time.Second * 1)
 
-	branches, err := g.repo.Branches()
-	utils.CheckIfError(err)
-	g.Summary.Branch = len(branches)
-
+	// 列表 commit ,统计作者
 	go func() {
+		tags, err := g.repo.Tags()
+		utils.CheckIfError(err)
+		g.Summary.Tags = len(tags)
+		branches, err := g.repo.Branches()
+		utils.CheckIfError(err)
+		g.Summary.Branch = len(branches)
 		for _, branch := range branches {
 			id, err := g.repo.BranchCommitID(branch)
 			utils.CheckIfError(err)
 
-			err = g.repo.LogGo(id)
+			count, err := g.repo.LogGo(id)
+			g.Summary.Commit[branch] = count
 			utils.CheckIfError(err)
 		}
 	}()
 
-	channel := GetChanInstance()
-	go channel.Sum()
-	timer1 := time.NewTicker(time.Second * 2)
+	// 按作者统计 代码量
+	go func() {
+		for {
+			select {
+			case c := <-commitChan.AuthorEmail:
+				_, exists := g.Summary.authorCountsMap.Load(c.Author.Email)
+				if !exists {
+					Debugf("统计作者%s\n", c.Author.Email)
+					ac := g.repo.SumAuthor(c.Author)
+					g.Summary.authorCountsMap.Store(c.Author.Email, ac)
+				}
+				channel.Process(c)
+			case <-timer.C:
+				Debugf("统计收到%d，完成%d\n", channel.receiveCount.Load(), channel.processCount.Load())
+				if channel.IsDone() {
+					Debugf("全部统计完毕-%d\n", channel.processCount)
+					channel.Complete()
+					return
+				}
+
+			}
+		}
+	}()
+
+	// 等待统计结束
 	for {
 		select {
-		case <-timer1.C:
-			Debug(".")
-
-		case <-channel.Done:
+		case <-channel.done:
 			Debug("over")
 			g.Summary.authorCountsMap.Range(func(k, v interface{}) bool {
 				g.Summary.AuthorCounts[k.(string)] = v.(*AuthorLinesCounter)

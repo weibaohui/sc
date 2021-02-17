@@ -6,8 +6,6 @@ package git
 
 import (
 	"bytes"
-	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -166,17 +164,6 @@ func escapePath(path string) string {
 	return path
 }
 
-// RepoLog returns a list of commits in the state of given revision of the repository
-// in given path. The returned list is in reverse chronological order.
-func RepoLog(repoPath, rev string, opts ...LogOptions) ([]*Commit, error) {
-	r, err := Open(repoPath)
-	if err != nil {
-		return nil, fmt.Errorf("open: %v", err)
-	}
-
-	return r.Log(rev, opts...)
-}
-
 func (r *Repository) SumAuthor(author *Signature) *AuthorLinesCounter {
 	// fmt.Println("统计作者", author, time.Now())
 	cmd := NewCommand("log")
@@ -246,7 +233,7 @@ func (r *Repository) Log(rev string, opts ...LogOptions) ([]*Commit, error) {
 	return r.parsePrettyFormatLogToList(opt.Timeout, stdout)
 }
 
-func (r *Repository) LogGo(rev string, opts ...LogOptions) error {
+func (r *Repository) LogGo(rev string, opts ...LogOptions) (count int, err error) {
 	var opt LogOptions
 	if len(opts) > 0 {
 		opt = opts[0]
@@ -275,9 +262,15 @@ func (r *Repository) LogGo(rev string, opts ...LogOptions) error {
 
 	stdout, err := cmd.RunInDirWithTimeout(opt.Timeout, r.path)
 	if err != nil {
-		return err
+		return 0, err
 	}
-	return r.parsePrettyFormatLogToListGo(opt.Timeout, stdout)
+
+	if len(stdout) == 0 {
+		return 0, nil
+	}
+	err = r.parsePrettyFormatLogToListGo(opt.Timeout, stdout)
+	ids := bytes.Split(stdout, []byte{'\n'})
+	return len(ids), err
 }
 
 // CommitByRevisionOptions contains optional arguments for getting a commit.
@@ -391,161 +384,4 @@ func (r *Repository) CommitsSince(rev string, since time.Time, opts ...CommitsSi
 		Path:    opt.Path,
 		Timeout: opt.Timeout,
 	})
-}
-
-// DiffNameOnlyOptions contains optional arguments for listing changed files.
-// Docs: https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---name-only
-type DiffNameOnlyOptions struct {
-	// Indicates whether two commits should have a merge base.
-	NeedsMergeBase bool
-	// The relative path of the repository.
-	Path string
-	// The timeout duration before giving up for each shell command execution.
-	// The default timeout duration will be used when not supplied.
-	Timeout time.Duration
-}
-
-// RepoDiffNameOnly returns a list of changed files between base and head revisions of
-// the repository in given path.
-func RepoDiffNameOnly(repoPath, base, head string, opts ...DiffNameOnlyOptions) ([]string, error) {
-	var opt DiffNameOnlyOptions
-	if len(opts) > 0 {
-		opt = opts[0]
-	}
-
-	cmd := NewCommand("diff", "--name-only")
-	if opt.NeedsMergeBase {
-		cmd.AddArgs(base + "..." + head)
-	} else {
-		cmd.AddArgs(base, head)
-	}
-	cmd.AddArgs("--")
-	if opt.Path != "" {
-		cmd.AddArgs(escapePath(opt.Path))
-	}
-
-	stdout, err := cmd.RunInDirWithTimeout(opt.Timeout, repoPath)
-	if err != nil {
-		return nil, err
-	}
-
-	lines := bytes.Split(stdout, []byte("\n"))
-	names := make([]string, 0, len(lines)-1)
-	for i := range lines {
-		if len(lines[i]) == 0 {
-			continue
-		}
-
-		names = append(names, string(lines[i]))
-	}
-	return names, nil
-}
-
-// DiffNameOnly returns a list of changed files between base and head revisions of the
-// repository.
-func (r *Repository) DiffNameOnly(base, head string, opts ...DiffNameOnlyOptions) ([]string, error) {
-	return RepoDiffNameOnly(r.path, base, head, opts...)
-}
-
-// RevListCountOptions contains optional arguments for counting commits.
-// Docs: https://git-scm.com/docs/git-rev-list#Documentation/git-rev-list.txt---count
-type RevListCountOptions struct {
-	// The relative path of the repository.
-	Path string
-	// The timeout duration before giving up for each shell command execution.
-	// The default timeout duration will be used when not supplied.
-	Timeout time.Duration
-}
-
-// RevListCount returns number of total commits up to given refspec of the repository.
-func (r *Repository) RevListCount(refspecs []string, opts ...RevListCountOptions) (int64, error) {
-	var opt RevListCountOptions
-	if len(opts) > 0 {
-		opt = opts[0]
-	}
-
-	if len(refspecs) == 0 {
-		return 0, errors.New("must have at least one refspec")
-	}
-
-	cmd := NewCommand("rev-list", "--count")
-	cmd.AddArgs(refspecs...)
-	cmd.AddArgs("--")
-	if opt.Path != "" {
-		cmd.AddArgs(escapePath(opt.Path))
-	}
-
-	stdout, err := cmd.RunInDirWithTimeout(opt.Timeout, r.path)
-	if err != nil {
-		return 0, err
-	}
-
-	return strconv.ParseInt(strings.TrimSpace(string(stdout)), 10, 64)
-}
-
-// RevListOptions contains optional arguments for listing commits.
-// Docs: https://git-scm.com/docs/git-rev-list
-type RevListOptions struct {
-	// The relative path of the repository.
-	Path string
-	// The timeout duration before giving up for each shell command execution.
-	// The default timeout duration will be used when not supplied.
-	Timeout time.Duration
-}
-
-// RevList returns a list of commits based on given refspecs in reverse chronological order.
-func (r *Repository) RevList(refspecs []string, opts ...RevListOptions) ([]*Commit, error) {
-	var opt RevListOptions
-	if len(opts) > 0 {
-		opt = opts[0]
-	}
-
-	if len(refspecs) == 0 {
-		return nil, errors.New("must have at least one refspec")
-	}
-
-	cmd := NewCommand("rev-list")
-	cmd.AddArgs(refspecs...)
-	cmd.AddArgs("--")
-	if opt.Path != "" {
-		cmd.AddArgs(escapePath(opt.Path))
-	}
-
-	stdout, err := cmd.RunInDirWithTimeout(opt.Timeout, r.path)
-	if err != nil {
-		return nil, err
-	}
-	return r.parsePrettyFormatLogToList(opt.Timeout, bytes.TrimSpace(stdout))
-}
-
-// LatestCommitTimeOptions contains optional arguments for getting the latest commit time.
-type LatestCommitTimeOptions struct {
-	// To get the latest commit time of the branch. When not set, it checks all branches.
-	Branch string
-	// The timeout duration before giving up for each shell command execution.
-	// The default timeout duration will be used when not supplied.
-	Timeout time.Duration
-}
-
-// LatestCommitTime returns the time of latest commit of the repository.
-func (r *Repository) LatestCommitTime(opts ...LatestCommitTimeOptions) (time.Time, error) {
-	var opt LatestCommitTimeOptions
-	if len(opts) > 0 {
-		opt = opts[0]
-	}
-
-	cmd := NewCommand("for-each-ref",
-		"--count=1",
-		"--sort=-committerdate",
-		"--format=%(committerdate:iso8601)",
-	)
-	if opt.Branch != "" {
-		cmd.AddArgs(RefsHeads + opt.Branch)
-	}
-
-	stdout, err := cmd.RunInDirWithTimeout(opt.Timeout, r.path)
-	if err != nil {
-		return time.Time{}, err
-	}
-	return time.Parse("2006-01-02 15:04:05 -0700", strings.TrimSpace(string(stdout)))
 }

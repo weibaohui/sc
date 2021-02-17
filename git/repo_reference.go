@@ -213,35 +213,15 @@ func (r *Repository) Branches() ([]string, error) {
 	}
 	return branches, nil
 }
-
-// DeleteBranchOptions contains optional arguments for deleting a branch.
-// // Docs: https://git-scm.com/docs/git-branch
-type DeleteBranchOptions struct {
-	// Indicates whether to force delete the branch.
-	Force bool
-	// The timeout duration before giving up for each shell command execution.
-	// The default timeout duration will be used when not supplied.
-	Timeout time.Duration
-}
-
-// RepoDeleteBranch deletes the branch from the repository in given path.
-func RepoDeleteBranch(repoPath, name string, opts ...DeleteBranchOptions) error {
-	var opt DeleteBranchOptions
-	if len(opts) > 0 {
-		opt = opts[0]
+func (r *Repository) Tags() ([]string, error) {
+	heads, err := r.ShowRef(ShowRefOptions{Tags: true})
+	if err != nil {
+		return nil, err
 	}
 
-	cmd := NewCommand("branch")
-	if opt.Force {
-		cmd.AddArgs("-D")
-	} else {
-		cmd.AddArgs("-d")
+	tags := make([]string, len(heads))
+	for i := range heads {
+		tags[i] = strings.TrimPrefix(heads[i].RefSpec, RefsTags)
 	}
-	_, err := cmd.AddArgs(name).RunInDirWithTimeout(opt.Timeout, repoPath)
-	return err
-}
-
-// DeleteBranch deletes the branch from the repository.
-func (r *Repository) DeleteBranch(name string, opts ...DeleteBranchOptions) error {
-	return RepoDeleteBranch(r.path, name, opts...)
+	return tags, nil
 }

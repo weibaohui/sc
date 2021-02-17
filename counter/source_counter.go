@@ -14,7 +14,7 @@ var (
 	CountTypeCode    = "Code"    // code
 	CountTypeBlank   = "Blank"   // blank
 	CountTypeComment = "Comment" // comment
-	CountTypeSum     = "Sum"     // sum
+	CountTypeSum     = "Process" // sum
 )
 
 type fileTypeCounter struct {
