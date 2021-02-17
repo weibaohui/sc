@@ -22,8 +22,8 @@ func init() {
 		commitChan = &CommitChan{
 			AuthorEmail:  make(chan *Commit, 100),
 			done:         make(chan bool),
-			receiveCount: atomic.NewInt32(0),
-			processCount: atomic.NewInt32(0),
+			receiveCount: atomic.NewInt32(-1), // 避免0值，区分是默认值还是累加值，用于极端情况，两个count都是0值
+			processCount: atomic.NewInt32(-1),
 		}
 	})
 }

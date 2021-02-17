@@ -6,6 +6,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/xxjwxc/gowp/workpool"
+
 	"github.com/weibaohui/sc/config"
 	"github.com/weibaohui/sc/utils"
 )
@@ -32,8 +34,9 @@ type Summary struct {
 	Commit          map[string]int
 	AuthorCounts    map[string]*AuthorLinesCounter
 	authorList      map[string]*Signature // 用户列表
-	authorCountsMap *sync.Map             // 并发使用
+	authorCountsMap *sync.Map             // 并发统计结果
 	CurrentBranch   string                // 当前分支
+	ing             *sync.Map             // 当前处理中的数据
 }
 type Git struct {
 	Summary *Summary
@@ -70,28 +73,56 @@ func (g *Git) GoExecute() *Git {
 
 	// 按作者统计 代码量
 	go func() {
-		for {
-			select {
-			case c := <-commitChan.AuthorEmail:
-				_, exists := g.Summary.authorCountsMap.Load(c.Author.Email)
-				if !exists {
-					Debugf("统计作者%s\n", c.Author.Email)
-					ac := g.repo.SumAuthor(c.Author)
-					if ac != nil {
-						g.Summary.authorCountsMap.Store(c.Author.Email, ac)
-					}
-					// debug 查看
-					if config.GetInstance().Debug {
-						if v, ok := g.Summary.authorCountsMap.Load(c.Author.Email); ok && v != nil {
-							tmp := v.(*AuthorLinesCounter)
-							if tmp != nil {
-								Debugf("%s[%s]:提交%d次,%d+,%d-\n", tmp.Name, tmp.Email, tmp.CommitCount, tmp.Addition, tmp.Deletion)
+		concurrency := config.GetInstance().Concurrency
+		wp := workpool.New(concurrency * 3)
+
+		for c := range commitChan.AuthorEmail {
+			_, exists := g.Summary.authorCountsMap.Load(c.Author.Email)
+			if !exists {
+				cc := c
+				if _, ingOk := g.Summary.ing.Load(c.Author.Email); ingOk {
+					// 正在处理中，那么计数器累加一
+					// 当收到的跟已处理的计数器值相等时，认为处理完毕
+					channel.Process(c)
+				} else {
+					// 不在处理中，那么新开处理器
+					// 1、加入到ing处理队列中
+					g.Summary.ing.Store(c.Author.Email, nil)
+					wp.Do(func() error {
+						Debugf("统计作者%s\n", cc.Author.Email)
+						ac := g.repo.SumAuthor(cc.Author)
+						if ac != nil {
+							g.Summary.authorCountsMap.Store(cc.Author.Email, ac)
+						}
+						// debug 查看
+						if config.GetInstance().Debug {
+							if v, ok := g.Summary.authorCountsMap.Load(cc.Author.Email); ok && v != nil {
+								tmp := v.(*AuthorLinesCounter)
+								if tmp != nil {
+									Debugf("%s[%s]:提交%d次,%d+,%d-\n", tmp.Name, tmp.Email, tmp.CommitCount, tmp.Addition, tmp.Deletion)
+								}
 							}
 						}
-					}
+						// 3、完成处理
+						channel.Process(c)
+						// 2、 处理完成，从ing中删除
+						g.Summary.ing.Delete(c.Author.Email)
+						return nil
+					})
 
 				}
+
+			} else {
 				channel.Process(c)
+			}
+		}
+		wp.Wait()
+
+	}()
+
+	go func() {
+		for {
+			select {
 			case <-timer.C:
 				Debugf("收到%d，完成%d\n", channel.receiveCount.Load(), channel.processCount.Load())
 				if channel.IsDone() {
@@ -99,7 +130,6 @@ func (g *Git) GoExecute() *Git {
 					channel.Complete()
 					return
 				}
-
 			}
 		}
 	}()
@@ -145,11 +175,13 @@ func init() {
 	once.Do(func() {
 		summary = &Summary{
 			Branch:          0,
+			Tags:            0,
 			Commit:          map[string]int{},
 			AuthorCounts:    map[string]*AuthorLinesCounter{},
-			Tags:            0,
-			authorCountsMap: &sync.Map{},
 			authorList:      map[string]*Signature{},
+			authorCountsMap: &sync.Map{},
+			CurrentBranch:   "",
+			ing:             &sync.Map{},
 		}
 	})
 }
