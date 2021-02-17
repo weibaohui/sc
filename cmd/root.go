@@ -32,12 +32,6 @@ var rootCmd = &cobra.Command{
 		cfg.InitPath = path
 		cfg.Silent = silent
 
-		initFolder := &file.Folder{
-			FullPath: cfg.InitPath,
-			Hidden:   false,
-		}
-		initFolder.Execute()
-
 		// 检查git 是否已经安装
 		if _, err := git.BinVersion(); err == nil {
 			result["git"] = git.GetInstance().Execute().Result()
@@ -46,7 +40,15 @@ var rootCmd = &cobra.Command{
 				fmt.Println("当前系统未安装git，暂不统计git信息")
 			}
 		}
+
+		initFolder := &file.Folder{
+			FullPath: cfg.InitPath,
+			Hidden:   false,
+		}
+		initFolder.Execute()
 		result["source"] = counter.GetInstance().Sum()
+
+		// 输出json
 		bytes, err := json.Marshal(result)
 		utils.CheckIfError(err)
 		fmt.Println(string(bytes))
