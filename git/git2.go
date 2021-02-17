@@ -35,7 +35,7 @@ func (a *AuthorLinesCounter) String() string {
 
 type Summary struct {
 	Branch          int
-	Commit          int
+	Commit          map[string]int
 	AuthorCounts    map[string]*AuthorLinesCounter
 	Tags            int
 	authorCountsMap *sync.Map             // 并发使用
@@ -45,6 +45,7 @@ type Git struct {
 	Summary *Summary
 }
 
+// Execute means begin to summary the git repo
 func (g *Git) Execute() *Git {
 	r, err := Open(".")
 	branches, err := r.Branches()
@@ -57,7 +58,7 @@ func (g *Git) Execute() *Git {
 
 		commits, err := r.Log(id)
 		// todo 取最大值 or 每个分支的数值
-		g.Summary.Commit = len(commits)
+		g.Summary.Commit[branch] = len(commits)
 		utils.CheckIfError(err)
 
 		for _, c := range commits {
@@ -87,11 +88,13 @@ func (g *Git) Execute() *Git {
 	return g
 }
 
+// String implement Stringer
 func (g *Git) String() string {
 	bytes, _ := json.Marshal(g.Summary)
 	return string(bytes)
 }
 
+// GetInstance return an *Git
 func GetInstance() *Git {
 	return &Git{
 		Summary: summary,
@@ -101,7 +104,7 @@ func init() {
 	once.Do(func() {
 		summary = &Summary{
 			Branch:          0,
-			Commit:          0,
+			Commit:          map[string]int{},
 			AuthorCounts:    map[string]*AuthorLinesCounter{},
 			Tags:            0,
 			authorCountsMap: &sync.Map{},
