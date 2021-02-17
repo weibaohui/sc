@@ -11,6 +11,7 @@ type MagicType struct {
 // Types 魔数类型
 var Types = []MagicType{
 	{Name: "binary", Magic: "CFFAEDFE", Skip: true},
+	{Name: "linux binary", Magic: "7F454C46", Skip: true},
 	{Name: "ZIP", Magic: "504B0304", Suffix: "zip;jar", Skip: true},
 	{Name: "MS Office/OLE2", Magic: "D0CF11E0", Suffix: "doc;xls;dot;ppt;xla;ppa;pps;pot;msi;sdw;db", Skip: true},
 	{Name: "GZ Archive", Magic: "1F8B08", Suffix: "gz;tgz", Skip: true},
