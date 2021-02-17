@@ -33,6 +33,7 @@ type Summary struct {
 	AuthorCounts    map[string]*AuthorLinesCounter
 	authorList      map[string]*Signature // 用户列表
 	authorCountsMap *sync.Map             // 并发使用
+	CurrentBranch   string                // 当前分支
 }
 type Git struct {
 	Summary *Summary
@@ -46,12 +47,17 @@ func (g *Git) GoExecute() *Git {
 
 	// 列表 commit ,统计作者
 	go func() {
+
+		ref, err := g.repo.SymbolicRef()
+		utils.CheckIfError(err)
+		g.Summary.CurrentBranch = RefShortName(ref)
 		tags, err := g.repo.Tags()
 		utils.CheckIfError(err)
 		g.Summary.Tags = len(tags)
 		branches, err := g.repo.Branches()
 		utils.CheckIfError(err)
 		g.Summary.Branch = len(branches)
+
 		for _, branch := range branches {
 			id, err := g.repo.BranchCommitID(branch)
 			utils.CheckIfError(err)

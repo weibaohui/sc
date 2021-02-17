@@ -50,11 +50,10 @@ func (r *Repository) parsePrettyFormatLogToList(timeout time.Duration, logs []by
 
 // parsePrettyFormatLogToList returns a list of commits parsed from given logs that are
 // formatted in LogFormatHashOnly.
-func (r *Repository) parsePrettyFormatLogToListGo(timeout time.Duration, logs []byte) error {
-	if len(logs) == 0 {
+func (r *Repository) parsePrettyFormatLogToListGo(timeout time.Duration, ids [][]byte) error {
+	if len(ids) == 0 {
 		return nil
 	}
-	ids := bytes.Split(logs, []byte{'\n'})
 	concurrency := config.GetInstance().Concurrency
 	wp := workpool.New(concurrency * 3)
 

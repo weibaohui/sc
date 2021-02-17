@@ -268,8 +268,9 @@ func (r *Repository) LogGo(rev string, opts ...LogOptions) (count int, err error
 	if len(stdout) == 0 {
 		return 0, nil
 	}
-	err = r.parsePrettyFormatLogToListGo(opt.Timeout, stdout)
 	ids := bytes.Split(stdout, []byte{'\n'})
+	err = r.parsePrettyFormatLogToListGo(opt.Timeout, ids)
+
 	return len(ids), err
 }
 
