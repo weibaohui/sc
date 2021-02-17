@@ -11,10 +11,10 @@ import (
 var (
 	sc               *SourceCounter
 	once             sync.Once
-	CountTypeCode    = "Code"    // code
+	CountTypeCode    = "Code"    // type code
 	CountTypeBlank   = "Blank"   // blank
 	CountTypeComment = "Comment" // comment
-	CountTypeSum     = "Process" // sum
+	CountTypeSum     = "Sum"     // sum
 )
 
 type fileTypeCounter struct {

@@ -14,7 +14,6 @@ type Config struct {
 	Debug       bool
 	Exclude     []string // 排除文件夹,逗号分割
 	Concurrency int
-	Silent      bool // 静默
 }
 
 var c *Config
@@ -28,7 +27,6 @@ func init() {
 			Debug:       false,
 			Exclude:     []string{"node_modules", "vendor", "pod"},
 			Concurrency: defaultConcurrency,
-			Silent:      false,
 		}
 	})
 }

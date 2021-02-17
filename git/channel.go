@@ -44,7 +44,7 @@ func (ch *CommitChan) Process(c *Commit) {
 
 // IsDone returns true only if process>0 and process==receive
 func (ch *CommitChan) IsDone() bool {
-	return ch.processCount.Load() > 0 && ch.processCount.Load() == ch.receiveCount.Load()
+	return ch.processCount.Load() >= 0 && ch.processCount.Load() == ch.receiveCount.Load()
 }
 
 func (ch *CommitChan) Complete() {

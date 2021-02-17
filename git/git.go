@@ -75,7 +75,7 @@ func (g *Git) GoExecute() *Git {
 				}
 				channel.Process(c)
 			case <-timer.C:
-				Debugf("统计收到%d，完成%d\n", channel.receiveCount.Load(), channel.processCount.Load())
+				Debugf("收到%d，完成%d\n", channel.receiveCount.Load(), channel.processCount.Load())
 				if channel.IsDone() {
 					Debugf("全部统计完毕-%d\n", channel.processCount)
 					channel.Complete()
@@ -90,7 +90,7 @@ func (g *Git) GoExecute() *Git {
 	for {
 		select {
 		case <-channel.done:
-			Debug("over")
+			Debug("统计结束")
 			g.Summary.authorCountsMap.Range(func(k, v interface{}) bool {
 				g.Summary.AuthorCounts[k.(string)] = v.(*AuthorLinesCounter)
 				return true

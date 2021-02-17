@@ -30,13 +30,12 @@ var rootCmd = &cobra.Command{
 		cfg.IgnoreHide = ignoreHide
 		cfg.Debug = debug
 		cfg.InitPath = path
-		cfg.Silent = silent
 
 		// 检查git 是否已经安装
 		if _, err := git.BinVersion(); err == nil {
 			result["git"] = git.GetInstance().GoExecute().Result()
 		} else {
-			if !cfg.Silent {
+			if cfg.Debug {
 				fmt.Println("当前系统未安装git，暂不统计git信息")
 			}
 		}
@@ -66,6 +65,5 @@ func Execute() {
 
 func init() {
 	rootCmd.Flags().BoolVarP(&debug, "debug", "d", false, "调试")
-	rootCmd.Flags().BoolVarP(&silent, "silent", "s", false, "静默执行")
 	rootCmd.Flags().StringVarP(&path, "path", "p", ".", "扫描路径")
 }
