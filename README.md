@@ -24,16 +24,18 @@ go get -u github.com/weibaohui/sc
 
 ```
 Usage:
-sc [flags]
+  sc [flags]
 
 Flags:
--d, --debug         调试
--h, --help          help for sc
--p, --path string   扫描路径 (default ".")
+  -d, --debug         调试
+  -h, --help          help for sc
+  -p, --path string   扫描路径 (default ".")
+  -s, --silent        静默执行
 ```
 
 # 输出值
 
+包含了git的用量统计，代码行数的统计
 ```json
 {
   "git": {
