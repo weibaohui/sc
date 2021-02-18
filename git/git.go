@@ -37,7 +37,6 @@ type Summary struct {
 	authorCountsMap *sync.Map             // 并发统计结果
 	CurrentBranch   string                // 当前分支
 	ing             *sync.Map             // 当前处理中的数据
-	rwMutex         sync.RWMutex
 }
 type Git struct {
 	Summary *Summary
@@ -177,7 +176,6 @@ func init() {
 			authorCountsMap: &sync.Map{},
 			CurrentBranch:   "",
 			ing:             &sync.Map{},
-			rwMutex:         sync.RWMutex{},
 		}
 	})
 }
