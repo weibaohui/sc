@@ -4,6 +4,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/weibaohui/sc)](https://goreportcard.com/report/github.com/weibaohui/sc)
 [![TODOs](https://badgen.net/https/api.tickgit.com/badgen/github.com/weibaohui/sc)](https://www.tickgit.com/browse?repo=github.com/weibaohui/sc)
 [![codecov](https://codecov.io/gh/weibaohui/sc/branch/master/graph/badge.svg)](https://codecov.io/gh/weibaohui/sc)
+![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/weibaohui/sc?sort=semver)
 
 # 简介
 
