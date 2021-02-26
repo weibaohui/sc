@@ -52,6 +52,9 @@ func (g *Git) GoExecute() *Git {
 	go func() {
 
 		ref, err := g.repo.SymbolicRef()
+		if err != nil {
+			channel.Complete()
+		}
 		utils.CheckIfError(err)
 		g.Summary.CurrentBranch = RefShortName(ref)
 		tags, err := g.repo.Tags()
