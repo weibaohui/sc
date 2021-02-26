@@ -64,4 +64,5 @@ var Types = []MagicType{
 	{Name: "TIFF", Magic: "4D4D002A", Suffix: "tif;tiff", Skip: true},
 	{Name: "PNG", Magic: "89504E47", Suffix: "png", Skip: true},
 	{Name: "JEPG", Magic: "FFD8FF", Suffix: "jpg;jpeg", Skip: true},
+	{Name: "WOFF2", Magic: "774F4632", Suffix: "woff2", Skip: true},
 }

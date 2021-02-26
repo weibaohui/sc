@@ -25,7 +25,7 @@ func init() {
 			InitPath:    ".",
 			IgnoreHide:  true,
 			Debug:       false,
-			Exclude:     []string{"node_modules", "vendor", "pod", "dist", "target", "bin"},
+			Exclude:     []string{"node_modules", "vendor", "pod", "dist", "target", "bin", "asset", "img", "assets"},
 			Concurrency: defaultConcurrency,
 		}
 	})
