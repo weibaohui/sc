@@ -41,6 +41,12 @@ func (f *File) CountLines() error {
 		return nil
 	}
 	ext := path.Ext(f.FullPath)
+	// 处理指定后缀跳过
+	for _, v := range cfg.SkipSuffix {
+		if ext == v {
+			return nil
+		}
+	}
 
 	sf, err := os.Open(f.FullPath)
 	defer sf.Close()

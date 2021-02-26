@@ -13,6 +13,7 @@ type Config struct {
 	IgnoreHide  bool
 	Debug       bool
 	Exclude     []string // 排除文件夹,逗号分割
+	SkipSuffix  []string // 跳过文件后缀
 	Concurrency int
 }
 
@@ -25,6 +26,7 @@ func init() {
 			InitPath:    ".",
 			IgnoreHide:  true,
 			Debug:       false,
+			SkipSuffix:  []string{".ico", ".tf", ".log", ".dapper", ".json", ".3", ".2", ".1"},
 			Exclude:     []string{"node_modules", "vendor", "pod", "dist", "target", "bin", "asset", "img", "assets"},
 			Concurrency: defaultConcurrency,
 		}
