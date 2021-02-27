@@ -76,8 +76,8 @@ func Execute() {
 
 func init() {
 	rootCmd.Flags().BoolVarP(&debug, "debug", "d", false, "调试")
-	rootCmd.Flags().BoolVarP(&force, "force", "f", false, "使用自定义配置覆盖默认初始配置，否则合并")
+	rootCmd.Flags().BoolVarP(&force, "force", "", false, "使用自定义配置覆盖默认初始配置，否则合并")
 	rootCmd.Flags().StringVarP(&path, "path", "p", ".", "扫描路径")
-	rootCmd.Flags().StringVarP(&skipSuffix, "skipSuffix", "s", "", "跳过文件后缀列表,使用逗号分割")
-	rootCmd.Flags().StringVarP(&exclude, "exclude", "e", "", "跳过文件夹列表,使用逗号分割")
+	rootCmd.Flags().StringVarP(&skipSuffix, "skipSuffix", "", "", "跳过文件后缀列表,使用逗号分割")
+	rootCmd.Flags().StringVarP(&exclude, "exclude", "", "", "跳过文件夹列表,使用逗号分割")
 }

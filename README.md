@@ -31,13 +31,24 @@ Usage:
   sc [flags]
 
 Flags:
-  -d, --debug         调试
-  -h, --help          help for sc
-  -p, --path string   扫描路径 (default ".")
+  -d, --debug               调试
+      --exclude string      跳过文件夹列表,使用逗号分割
+      --force               使用自定义配置覆盖默认初始配置，否则合并
+  -h, --help                help for sc
+  -p, --path string         扫描路径 (default ".")
+      --skipSuffix string   跳过文件后缀列表,使用逗号分割
+```
+
+排除x文件夹，跳过后缀为.x .y .z 三种后缀
+
+```shell
+sc -d --skipSuffix ".x,.y,.z" --exclude "x"
 ```
 
 # docker use
+
 docker -v 挂载待扫描目录到容器里面 sc -p 扫描指定目录
+
 ```docker
 docker run -it --rm -v $(pwd):/code/  weibh/sc  -p /code/ 
 ```
@@ -49,11 +60,10 @@ docker run -it --rm -v $(pwd):/code/  weibh/sc  -p /code/
 ```json
 {
   "git": {
-    "Branch": 2,
-    "Tags": 0,
+    "Branch": 1,
+    "Tags": 7,
     "Commit": {
-      "git": 56,
-      "main": 62
+      "main": 104
     },
     "AuthorCounts": {
       "weibaohui@chinamobile.com": {
@@ -66,62 +76,51 @@ docker run -it --rm -v $(pwd):/code/  weibh/sc  -p /code/
       "weibaohui@yeah.net": {
         "Email": "weibaohui@yeah.net",
         "Name": "weibaohui",
-        "CommitCount": 163,
-        "Addition": 9638,
-        "Deletion": 7235
+        "CommitCount": 246,
+        "Addition": 11242,
+        "Deletion": 8613
       }
-    }
+    },
+    "CurrentBranch": "main"
   },
   "source": {
     "FileTypeCounter": {
       "": {
-        "Code": 26,
-        "Blank": 8,
+        "Code": 28,
+        "Blank": 7,
         "Comment": 0
       },
       ".go": {
-        "Code": 2166,
-        "Blank": 338,
-        "Comment": 0
-      },
-      ".log": {
-        "Code": 1,
-        "Blank": 1,
+        "Code": 2498,
+        "Blank": 251,
         "Comment": 0
       },
       ".md": {
-        "Code": 64,
-        "Blank": 17,
-        "Comment": 0
-      },
-      ".mod": {
-        "Code": 8,
-        "Blank": 4,
+        "Code": 116,
+        "Blank": 19,
         "Comment": 0
       },
       ".sum": {
-        "Code": 421,
+        "Code": 366,
         "Blank": 1,
         "Comment": 0
       },
       "Sum": {
-        "Code": 2686,
-        "Blank": 369,
+        "Code": 3008,
+        "Blank": 278,
         "Comment": 0
       }
     }
   }
 }
+
 ```
 
 # 说明
 
 默认排除了隐藏文件及文件夹 使用魔法数识别二进制文件并排除
 
-# todo
 
-- docker √
-- git ing
 
 ## Thanks
 
