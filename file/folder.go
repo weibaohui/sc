@@ -1,8 +1,8 @@
 package file
 
 import (
-	"io/ioutil"
 	"log"
+	"os"
 	"path"
 	"strings"
 
@@ -40,7 +40,7 @@ func countFolderList(f *Folder) {
 
 // List 列出指定路径下的文件和文件夹
 func (f *Folder) List(fullPath string) (fileList []*File, folderList []*Folder) {
-	fileInfos, err := ioutil.ReadDir(fullPath)
+	fileInfos, err := os.ReadDir(fullPath)
 	if err != nil {
 		log.Fatal(err)
 	}
