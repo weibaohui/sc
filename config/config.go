@@ -15,6 +15,7 @@ type Config struct {
 	Exclude     []string // 排除文件夹,逗号分割
 	SkipSuffix  []string // 跳过文件后缀
 	Concurrency int
+	Force       bool // 使用自定义配置覆盖默认配置
 }
 
 var c *Config

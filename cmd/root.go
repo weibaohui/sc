@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -17,8 +18,10 @@ import (
 var (
 	ignoreHide = true
 	debug      = false
+	force      = false
 	path       string
-	silent     = false
+	skipSuffix string
+	exclude    string
 )
 
 var rootCmd = &cobra.Command{
@@ -30,6 +33,24 @@ var rootCmd = &cobra.Command{
 		cfg.IgnoreHide = ignoreHide
 		cfg.Debug = debug
 		cfg.InitPath = path
+		if cfg.Force {
+			cfg.SkipSuffix = strings.Split(skipSuffix, ",")
+			cfg.Exclude = strings.Split(exclude, ",")
+		} else {
+			for _, v := range strings.Split(skipSuffix, ",") {
+				cfg.SkipSuffix = append(cfg.SkipSuffix, v)
+			}
+			for _, v := range strings.Split(exclude, ",") {
+				cfg.Exclude = append(cfg.Exclude, v)
+			}
+		}
+
+		if cfg.Debug {
+			if bytes, err := json.Marshal(cfg); err == nil {
+				fmt.Println(string(bytes))
+			}
+
+		}
 
 		// 检查git 是否已经安装
 		if _, err := git.BinVersion(); err == nil {
@@ -65,5 +86,8 @@ func Execute() {
 
 func init() {
 	rootCmd.Flags().BoolVarP(&debug, "debug", "d", false, "调试")
+	rootCmd.Flags().BoolVarP(&force, "force", "f", false, "使用自定义配置覆盖默认初始配置，否则合并")
 	rootCmd.Flags().StringVarP(&path, "path", "p", ".", "扫描路径")
+	rootCmd.Flags().StringVarP(&skipSuffix, "skipSuffix", "s", "", "跳过文件后缀列表,使用逗号分割")
+	rootCmd.Flags().StringVarP(&exclude, "exclude", "e", "", "跳过文件夹列表,使用逗号分割")
 }
