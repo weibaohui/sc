@@ -85,7 +85,11 @@ func (f *File) CountLines() error {
 		if err != nil {
 			if err == io.EOF {
 				if cfg.Debug {
-					fmt.Printf("文件 %s \t  行数 %d \t魔法数 %s \t 试读 %s \n", f.FullPath, codeCount, head, string(b))
+					s := string(b)
+					s = strings.Replace(s, "\r", " ", -1)
+					s = strings.Replace(s, "\n", " ", -1)
+					s = strings.Replace(s, "\t", " ", -1)
+					fmt.Printf("文件 %s \t  行数 %d \t魔法数 %s \t 试读 %s \n", f.FullPath, codeCount, head, s)
 				}
 				return nil
 			}
