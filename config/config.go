@@ -26,7 +26,7 @@ func init() {
 			InitPath:    ".",
 			IgnoreHide:  true,
 			Debug:       false,
-			SkipSuffix:  []string{".ico", ".tf", ".log", ".dapper", ".json", ".3", ".2", ".1"},
+			SkipSuffix:  []string{".ico", ".tf", ".xsl", ".log", ".dapper", ".json", ".3", ".2", ".1"},
 			Exclude:     []string{"node_modules", "vendor", "pod", "dist", "target", "bin", "asset", "img", "assets"},
 			Concurrency: defaultConcurrency,
 		}
