@@ -5,7 +5,6 @@
 [![TODOs](https://badgen.net/https/api.tickgit.com/badgen/github.com/weibaohui/sc)](https://www.tickgit.com/browse?repo=github.com/weibaohui/sc)
 [![codecov](https://codecov.io/gh/weibaohui/sc/branch/master/graph/badge.svg)](https://codecov.io/gh/weibaohui/sc)
 ![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/weibaohui/sc?sort=semver)
-[![Stargazers over time](https://starchart.cc/weibaohui/sc.svg)](https://starchart.cc/weibaohui/sc)
 
 # 简介
 
