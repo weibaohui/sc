@@ -67,4 +67,7 @@ var Types = []MagicType{
 	{Name: "WOFF2", Magic: "774F4632", Suffix: "woff2", Skip: true},
 	{Name: "SIVA", Magic: "5B636F726", Suffix: "siva", Skip: true},
 	{Name: "ICO", Magic: " 0000010001", Suffix: "ico", Skip: true},
+	{Name: "MO", Magic: " DE120495", Suffix: "mo", Skip: true},
+	{Name: "PO", Magic: " 2320", Suffix: "po;pot", Skip: true},
+	{Name: "parquet", Magic: " 50415231", Suffix: "parquet", Skip: true},
 }
