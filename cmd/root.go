@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -33,17 +32,8 @@ var rootCmd = &cobra.Command{
 		cfg.IgnoreHide = ignoreHide
 		cfg.Debug = debug
 		cfg.InitPath = path
-		if cfg.Force {
-			cfg.SkipSuffix = strings.Split(skipSuffix, ",")
-			cfg.Exclude = strings.Split(exclude, ",")
-		} else {
-			for _, v := range strings.Split(skipSuffix, ",") {
-				cfg.SkipSuffix = append(cfg.SkipSuffix, v)
-			}
-			for _, v := range strings.Split(exclude, ",") {
-				cfg.Exclude = append(cfg.Exclude, v)
-			}
-		}
+		cfg.SetSkipSuffix(skipSuffix)
+		cfg.SetExclude(exclude)
 
 		if cfg.Debug {
 			if bytes, err := json.Marshal(cfg); err == nil {

@@ -2,6 +2,7 @@ package config
 
 import (
 	"runtime"
+	"strings"
 	"sync"
 )
 
@@ -27,10 +28,10 @@ func init() {
 			InitPath:   ".",
 			IgnoreHide: true,
 			Debug:      false,
-			SkipSuffix: []string{".ico", ".tf", ".xsl",
+			SkipSuffix: []string{".ico", ".tf", ".xsl", ".BUILD",
 				"gitkeep", ".log", ".po", ".pot", ".parquet",
-				".dapper", ".json", ".3", ".2", ".1", ".000", ".tmp_drop", ".tmpfiles", ".sysusers", ".response", ".xcbuild", ".pbxproj",
-				".3dm",
+				".dapper", ".3", ".2", ".1", ".000", ".tmp_drop", ".tmpfiles", ".sysusers", ".response", ".xcbuild", ".pbxproj",
+				".3dm", ".targets", ".proto", ".S", ".asm", ".eot",
 				".4ct",
 				".4tc",
 				".7z",
@@ -90,7 +91,6 @@ func init() {
 				".bz2",
 				".bzip",
 				".bzip2",
-				".c",
 				".c_date",
 				".ca",
 				".cab",
@@ -230,7 +230,6 @@ func init() {
 				".gtex",
 				".gz",
 				".gzip",
-				".h",
 				".hdp",
 				".hex",
 				".hi",
@@ -240,7 +239,6 @@ func init() {
 				".hpp",
 				".hprof",
 				".hst",
-				".html",
 				".hw",
 				".hwdef",
 				".i",
@@ -288,7 +286,6 @@ func init() {
 				".jpg",
 				".jpm",
 				".jpx",
-				".js",
 				".js_",
 				".jsc",
 				".jxr",
@@ -528,7 +525,6 @@ func init() {
 				".sout",
 				".spec",
 				".spl",
-				".sql",
 				".sqlite",
 				".rock",
 				".srec",
@@ -657,7 +653,6 @@ func init() {
 				".xdy",
 				".xlk",
 				".xln",
-				".xml",
 				".xmpi",
 				".xojo_uistate",
 				".xpi",
@@ -669,11 +664,11 @@ func init() {
 				".xyd",
 				".xz",
 				".zip",
-				".zo"},
+				".zo", ".otf"},
 			Exclude: []string{"node_modules", "vendor", "pod", "dist", "target",
 				"bin", "asset", "img", ".vscode", ".idea", ".axoCover", "RECYCLE.BIN", "IntegrationServer", ".dSYM", ".egg-info", ".nuget", ".run", ".sln",
 				"generated", "tmp", "Build", ".DesktopClient", ".bundle", ".eggs", ".cask", ".gradle", ".grunt", ".gwt", ".gwt-tmp", ".hypothesis", ".history", ".yarn",
-				".import",
+				".import", ".targets",
 				".ionide",
 				".jekyll-cache",
 				".kdev4",
@@ -831,6 +826,7 @@ func init() {
 				"www-test",
 				"xcuserdata",
 				"xlnx_auto_0_xdb",
+				"build",
 			},
 			Concurrency: defaultConcurrency,
 		}
@@ -842,6 +838,32 @@ func (c *Config) SetConfig(ignoreHide bool, debug bool) *Config {
 	c.IgnoreHide = ignoreHide
 	c.Debug = debug
 	return c
+}
+
+func (c *Config) SetSkipSuffix(suffix string) {
+	if len(suffix) == 0 {
+		return
+	}
+	if c.Force {
+		c.SkipSuffix = strings.Split(suffix, ",")
+	} else {
+		for _, v := range strings.Split(suffix, ",") {
+			c.SkipSuffix = append(c.SkipSuffix, v)
+		}
+	}
+}
+
+func (c *Config) SetExclude(exclude string) {
+	if len(exclude) == 0 {
+		return
+	}
+	if c.Force {
+		c.Exclude = strings.Split(exclude, ",")
+	} else {
+		for _, v := range strings.Split(exclude, ",") {
+			c.Exclude = append(c.Exclude, v)
+		}
+	}
 }
 
 // GetInstance get an Instance

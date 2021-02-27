@@ -11,6 +11,7 @@ import (
 
 	"github.com/weibaohui/sc/config"
 	"github.com/weibaohui/sc/counter"
+	"github.com/weibaohui/sc/utils"
 )
 
 // File 文件
@@ -42,10 +43,8 @@ func (f *File) CountLines() error {
 	}
 	ext := path.Ext(f.FullPath)
 	// 处理指定后缀跳过
-	for _, v := range cfg.SkipSuffix {
-		if ext == v {
-			return nil
-		}
+	if utils.InArray(ext, cfg.SkipSuffix) {
+		return nil
 	}
 
 	sf, err := os.Open(f.FullPath)
@@ -53,17 +52,19 @@ func (f *File) CountLines() error {
 	b := make([]byte, 30)
 	head := ""
 	if _, err = sf.Read(b); err == nil {
-
 		head = hex.EncodeToString(b)
 		head = strings.ToUpper(head)
-		// fmt.Printf("识别 %s 文件%s \n", f.FullPath, string(b))
-
+		// if ext == ".reference"|| ext==".pl" {
+		// 	fmt.Println("xxxxxx",head,f.FullPath)
+		// }
 		for _, magicType := range Types {
 			if strings.HasPrefix(head, magicType.Magic) {
-				if cfg.Debug {
-					// fmt.Printf("识别到【%s】类型文件%s,跳过=%t\n", magicType.Name, f.FullPath, magicType.Skip)
+				// if cfg.Debug {
+				// 	fmt.Printf("识别到【%s】类型文件%s,跳过=%t\n", magicType.Name, f.FullPath, magicType.Skip)
+				// }
+				if magicType.Skip {
+					return nil
 				}
-				return nil
 			}
 		}
 	}

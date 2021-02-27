@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/weibaohui/sc/config"
+	"github.com/weibaohui/sc/utils"
 )
 
 // Folder 文件夹
@@ -50,11 +51,10 @@ func (f *Folder) List(fullPath string) (fileList []*File, folderList []*Folder) 
 		hidden := strings.HasPrefix(fi.Name(), ".")
 		if fi.IsDir() {
 			// 文件夹是否在排除列表
-			for _, s := range cfg.Exclude {
-				if s == fi.Name() {
-					return
-				}
+			if utils.InArray(fi.Name(), cfg.Exclude) {
+				continue
 			}
+
 			folderList = append(folderList,
 				&Folder{
 					Name:     fi.Name(),
