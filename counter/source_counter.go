@@ -14,24 +14,24 @@ var (
 	CountTypeCode    = "Code"    // type code
 	CountTypeBlank   = "Blank"   // blank
 	CountTypeComment = "Comment" // comment
-	CountTypeSum     = "Sum"     // sum
 )
 
 type fileTypeCounter struct {
-	Code    int // 代码行数
-	Blank   int // 空行
-	Comment int // 注释
+	Code    int    // 代码行数
+	Blank   int    // 空行
+	Comment int    // 注释
+	Name    string // 类型名称
 }
 
 // SourceCounter  contains the file type,and it's count
 type SourceCounter struct {
-	FileTypeCounter map[string]*fileTypeCounter
+	FileTypeCounterList []*fileTypeCounter
 }
 
 func init() {
 	once.Do(func() {
 		sc = &SourceCounter{
-			FileTypeCounter: make(map[string]*fileTypeCounter),
+			FileTypeCounterList: []*fileTypeCounter{},
 		}
 	})
 	if config.GetInstance().Debug {
@@ -46,14 +46,21 @@ func GetInstance() *SourceCounter {
 
 // Incr increase a counter
 func (s *SourceCounter) Incr(fileType, countType string, count int) {
-	fc := s.FileTypeCounter[fileType]
+	var fc *fileTypeCounter
+	for _, counter := range s.FileTypeCounterList {
+		if counter.Name == fileType {
+			fc = counter
+		}
+	}
+
 	if fc == nil {
 		fc = &fileTypeCounter{
 			Code:    0,
 			Blank:   0,
 			Comment: 0,
+			Name:    fileType,
 		}
-		s.FileTypeCounter[fileType] = fc
+		s.FileTypeCounterList = append(s.FileTypeCounterList, fc)
 	}
 	switch countType {
 	case CountTypeCode:
@@ -72,22 +79,22 @@ func (s *SourceCounter) Sum() *SourceCounter {
 		Code:    0,
 		Blank:   0,
 		Comment: 0,
+		Name:    "ALL",
 	}
-	for _, c := range s.FileTypeCounter {
+	for _, c := range s.FileTypeCounterList {
 		sum.Code += c.Code
 		sum.Blank += c.Blank
 		sum.Comment += c.Comment
 	}
 
-	s.FileTypeCounter[CountTypeSum] = sum
-
+	s.FileTypeCounterList = append(s.FileTypeCounterList, sum)
 	return s
 
 }
 
 // String
 func (s *SourceCounter) String() string {
-	bytes, err := json.Marshal(s.FileTypeCounter)
+	bytes, err := json.Marshal(s.FileTypeCounterList)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
@@ -97,6 +104,6 @@ func (s *SourceCounter) String() string {
 	return string(bytes)
 }
 
-func (s *SourceCounter) Result() map[string]*fileTypeCounter {
-	return s.FileTypeCounter
+func (s *SourceCounter) Result() []*fileTypeCounter {
+	return s.FileTypeCounterList
 }

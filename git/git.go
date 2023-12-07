@@ -15,13 +15,16 @@ import (
 var once = sync.Once{}
 var summary *Summary
 
-type AuthorLinesCounters map[string]*AuthorLinesCounter
 type AuthorLinesCounter struct {
 	Email       string // 作者邮箱
 	Name        string // 作者名称
 	CommitCount int    // 提交次数
 	Addition    int    // 增加
 	Deletion    int    // 删除
+}
+type BranchCommit struct {
+	Name  string // 分支名称
+	Count int    // 提交次数
 }
 
 func (a *AuthorLinesCounter) String() string {
@@ -31,9 +34,8 @@ func (a *AuthorLinesCounter) String() string {
 type Summary struct {
 	Branch          int
 	Tags            int
-	Commit          map[string]int
-	AuthorCounts    map[string]*AuthorLinesCounter
-	authorList      map[string]*Signature // 用户列表
+	BranchCommits   []*BranchCommit
+	AuthorCountList []*AuthorLinesCounter // 用户列表
 	authorCountsMap *sync.Map             // 并发统计结果
 	CurrentBranch   string                // 当前分支
 	ing             *sync.Map             // 当前处理中的数据
@@ -69,7 +71,10 @@ func (g *Git) GoExecute() *Git {
 			utils.CheckIfError(err)
 
 			count, err := g.repo.LogGo(id)
-			g.Summary.Commit[branch] = count
+			g.Summary.BranchCommits = append(g.Summary.BranchCommits, &BranchCommit{
+				Name:  branch,
+				Count: count,
+			})
 			utils.CheckIfError(err)
 		}
 	}()
@@ -137,7 +142,7 @@ func (g *Git) GoExecute() *Git {
 		case <-channel.done:
 			Debug("统计结束")
 			g.Summary.authorCountsMap.Range(func(k, v interface{}) bool {
-				g.Summary.AuthorCounts[k.(string)] = v.(*AuthorLinesCounter)
+				g.Summary.AuthorCountList = append(g.Summary.AuthorCountList, v.(*AuthorLinesCounter))
 				return true
 			})
 			return g
@@ -173,9 +178,8 @@ func init() {
 		summary = &Summary{
 			Branch:          0,
 			Tags:            0,
-			Commit:          map[string]int{},
-			AuthorCounts:    map[string]*AuthorLinesCounter{},
-			authorList:      map[string]*Signature{},
+			BranchCommits:   []*BranchCommit{},
+			AuthorCountList: []*AuthorLinesCounter{},
 			authorCountsMap: &sync.Map{},
 			CurrentBranch:   "",
 			ing:             &sync.Map{},
