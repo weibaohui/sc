@@ -60,56 +60,106 @@ docker run -it --rm -v $(pwd):/code/  weibh/sc  -p /code/
 {
   "git": {
     "Branch": 1,
-    "Tags": 7,
-    "Commit": {
-      "main": 104
-    },
-    "AuthorCounts": {
-      "weibaohui@chinamobile.com": {
-        "Email": "weibaohui@chinamobile.com",
-        "Name": "weibh",
-        "CommitCount": 61,
-        "Addition": 1442,
-        "Deletion": 559
-      },
-      "weibaohui@yeah.net": {
-        "Email": "weibaohui@yeah.net",
-        "Name": "weibaohui",
-        "CommitCount": 246,
-        "Addition": 11242,
-        "Deletion": 8613
+    "Tags": 4,
+    "Commit": [
+      {
+        "Name": "master",
+        "CommitCount": 147
       }
-    },
-    "CurrentBranch": "main"
+    ],
+    "AuthorCountList": [
+      {
+        "Email": "xxxx@xxx.com",
+        "Name": "xxx",
+        "CommitCount": 8363,
+        "Addition": 1643663,
+        "Deletion": 240346
+      },
+      {
+        "Email": "qq@qq.com",
+        "Name": "qq-ci-bot",
+        "CommitCount": 3,
+        "Addition": 73,
+        "Deletion": 0
+      }
+    ],
+    "CurrentBranch": "master"
   },
   "source": {
-    "FileTypeCounter": {
-      "": {
-        "Code": 28,
-        "Blank": 7,
-        "Comment": 0
+    "FileTypeCounterList": [
+      {
+        "Code": 256,
+        "Blank": 105,
+        "Comment": 0,
+        "Name": ""
       },
-      ".go": {
-        "Code": 2498,
-        "Blank": 251,
-        "Comment": 0
-      },
-      ".md": {
-        "Code": 116,
-        "Blank": 19,
-        "Comment": 0
-      },
-      ".sum": {
-        "Code": 366,
+      {
+        "Code": 1078,
         "Blank": 1,
-        "Comment": 0
+        "Comment": 0,
+        "Name": ".sum"
       },
-      "Sum": {
-        "Code": 3008,
-        "Blank": 278,
-        "Comment": 0
+      {
+        "Code": 87,
+        "Blank": 12,
+        "Comment": 0,
+        "Name": ".toml"
+      },
+      {
+        "Code": 4339,
+        "Blank": 441,
+        "Comment": 0,
+        "Name": ".rs"
+      },
+      {
+        "Code": 486,
+        "Blank": 274,
+        "Comment": 0,
+        "Name": ".md"
+      },
+      {
+        "Code": 8275,
+        "Blank": 697,
+        "Comment": 0,
+        "Name": ".go"
+      },
+      {
+        "Code": 575,
+        "Blank": 8,
+        "Comment": 0,
+        "Name": ".yaml"
+      },
+      {
+        "Code": 98,
+        "Blank": 19,
+        "Comment": 0,
+        "Name": ".mount"
+      },
+      {
+        "Code": 31,
+        "Blank": 7,
+        "Comment": 0,
+        "Name": ".service"
+      },
+      {
+        "Code": 10,
+        "Blank": 1,
+        "Comment": 0,
+        "Name": ".txt"
+      },
+      {
+        "Code": 1192,
+        "Blank": 158,
+        "Comment": 0,
+        "Name": ".sh"
+      },
+      {
+        "Code": 16427,
+        "Blank": 1723,
+        "Comment": 0,
+        "Name": "ALL"
       }
-    }
+    ]
   }
 }
 
