@@ -18,7 +18,7 @@ go build
 # 安装
 
 ```
-go get -u github.com/weibaohui/sc
+go install github.com/weibaohui/sc@latest
 ```
 
 # 基本用法
