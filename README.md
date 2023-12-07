@@ -1,7 +1,6 @@
 [![GoDev](https://img.shields.io/static/v1?label=godev&message=reference&color=00add8)](https://pkg.go.dev/github.com/weibaohui/sc)
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/weibaohui/sc)
-[![BuildStatus](https://github.com/weibaohui/sc/workflows/build/badge.svg)](https://github.com/weibaohui/sc/actions?workflow=build)
-[![Go Report Card](https://goreportcard.com/badge/github.com/weibaohui/sc)](https://goreportcard.com/report/github.com/weibaohui/sc)
+[![Go](https://github.com/weibaohui/sc/actions/workflows/go.yml/badge.svg)](https://github.com/weibaohui/sc/actions/workflows/go.yml)[![Go Report Card](https://goreportcard.com/badge/github.com/weibaohui/sc)](https://goreportcard.com/report/github.com/weibaohui/sc)
 [![TODOs](https://badgen.net/https/api.tickgit.com/badgen/github.com/weibaohui/sc)](https://www.tickgit.com/browse?repo=github.com/weibaohui/sc)
 [![codecov](https://codecov.io/gh/weibaohui/sc/branch/master/graph/badge.svg)](https://codecov.io/gh/weibaohui/sc)
 ![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/weibaohui/sc?sort=semver)
